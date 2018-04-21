@@ -1,0 +1,12 @@
+{
+  "name": "sonify",
+  "version": "0.0.0",
+  "description": "A module to sonify data",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "keywords": ["music", "data", "sonification"],
+  "author": "Kaitlin Moreno",
+  "license": "ISC"
+}
