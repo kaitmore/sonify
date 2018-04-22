@@ -64,15 +64,15 @@ function _createSound(freq, nextFreq, noteLength) {
 
   // The following stanza sets the gain value low at the beginning and ends of a note
   // to mitigate the clicking sound from starting and stopping the oscillator node.
-  gainNode.gain.setValueAtTime(0.001, this.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(
-    0.5,
-    this.currentTime + noteLength / 12
-  );
-  gainNode.gain.exponentialRampToValueAtTime(
-    0.001,
-    this.currentTime + noteLength
-  );
+  // gainNode.gain.setValueAtTime(0.001, this.currentTime);
+  // gainNode.gain.exponentialRampToValueAtTime(
+  //   0.5,
+  //   this.currentTime + noteLength / 12
+  // );
+  // gainNode.gain.exponentialRampToValueAtTime(
+  //   0.001,
+  //   this.currentTime + noteLength
+  // );
 
   oscillator.frequency.setValueAtTime(freq, this.currentTime);
   oscillator.frequency.exponentialRampToValueAtTime(
