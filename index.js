@@ -23,30 +23,66 @@ class Sonify {
     this.beats_per_sec = 1 / (bpm / 60);
   }
 }
-
 /**
  * _setContext
  * Creates a new web audio context in the window and sets currentTime
  * to the newly created context's currentTime
  * @return {void}
  */
-Sonify.prototype._setContext = function() {
+function _setContext() {
   this.context = new (window.AudioContext || window.webkitAudioContext)();
   this.currentTime = this.context.currentTime;
-};
-
+}
 /**
  * _clearContext
  * Clears the web audio context if the current state is "running"
  * and resets the internal currentTime to 0
  * @return {void}
  */
-Sonify.prototype._clearContext = function() {
+function _clearContext() {
   if (this.context && this.context.state === "running") {
     this.context.close();
     this.currentTime = 0;
   }
-};
+}
+
+/**
+ * _createSound
+ * Takes two frequencies and a note length (in beats) and
+ * creates a gain and oscillator node.
+ * @param {Array<Object>} data - An array of data point objects
+ * @param {string} data[].value - Integer value of the data point
+ * @param {string} data[].time - Unix timestamp value
+ * @return {Array<Object>} - An array of data point objects
+ */
+function _createSound(freq, nextFreq, noteLength) {
+  const gainNode = this.context.createGain();
+  gainNode.connect(this.context.destination);
+  const oscillator = this.context.createOscillator();
+
+  // The following stanza sets the gain value low at the beginning and ends of a note
+  // to mitigate the clicking sound from starting and stopping the oscillator node.
+  gainNode.gain.setValueAtTime(0.001, this.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(
+    0.5,
+    this.currentTime + noteLength / 12
+  );
+  gainNode.gain.exponentialRampToValueAtTime(
+    0.001,
+    this.currentTime + noteLength
+  );
+
+  oscillator.frequency.setValueAtTime(freq, this.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(
+    nextFreq,
+    this.currentTime + noteLength
+  );
+  oscillator.start(this.currentTime);
+  oscillator.stop(this.currentTime + noteLength);
+
+  this.currentTime += noteLength;
+  oscillator.connect(gainNode);
+}
 
 /**
  * mapNodesToPitches
@@ -123,44 +159,6 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
 };
 
 /**
- * _createSound
- * Takes two frequencies and a note length (in beats) and
- * creates a gain and oscillator node.
- * @param {Array<Object>} data - An array of data point objects
- * @param {string} data[].value - Integer value of the data point
- * @param {string} data[].time - Unix timestamp value
- * @return {Array<Object>} - An array of data point objects
- */
-Sonify.prototype._createSound = function(freq, nextFreq, noteLength) {
-  const gainNode = this.context.createGain();
-  gainNode.connect(this.context.destination);
-  const oscillator = this.context.createOscillator();
-
-  // The following stanza sets the gain value low at the beginning and ends of a note
-  // to mitigate the clicking sound from starting and stopping the oscillator node.
-  gainNode.gain.setValueAtTime(0.001, this.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(
-    0.5,
-    this.currentTime + noteLength / 12
-  );
-  gainNode.gain.exponentialRampToValueAtTime(
-    0.001,
-    this.currentTime + noteLength
-  );
-
-  oscillator.frequency.setValueAtTime(freq, this.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(
-    nextFreq,
-    this.currentTime + noteLength
-  );
-  oscillator.start(this.currentTime);
-  oscillator.stop(this.currentTime + noteLength);
-
-  this.currentTime += noteLength;
-  oscillator.connect(gainNode);
-};
-
-/**
  * play
  * Maps through data with keys "value", "time", and "noteLength", and
  * calls this._createSound to create the appropriate nodes
@@ -175,7 +173,7 @@ Sonify.prototype.play = function(data) {
     this._clearContext();
   }
 
-  this._setContext();
+  _setContext.call(this);
 
   for (var i = 0; i < data.length; i++) {
     const isDataFormatted = validateArgs(
@@ -190,7 +188,7 @@ Sonify.prototype.play = function(data) {
     var freq = this.pitches[data[i].value];
     var nextFreq = this.pitches[data[i + 1].value];
     var noteLength = data[i].noteLength;
-    this._createSound(freq, nextFreq, noteLength);
+    _createSound.apply(this, [freq, nextFreq, noteLength]);
   }
 };
 
@@ -200,7 +198,7 @@ Sonify.prototype.play = function(data) {
  * @returns {void}
  */
 Sonify.prototype.stop = function() {
-  this._clearContext();
+  _clearContext.call(this);
 };
 
 module.exports = Sonify;
