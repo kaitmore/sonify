@@ -2,11 +2,22 @@
   "name": "sonify",
   "version": "0.0.0",
   "description": "A module to sonify data",
-  "main": "index.js",
+  "main": "build.js",
   "scripts": {
-    "test": "npm test"
+    "test": "npm test",
+    "build": "babel index.js -o build.js"
   },
+  "files": ["build.js"],
   "keywords": ["music", "data", "sonification"],
   "author": "Kaitlin Moreno",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-3": "^6.24.1"
+  }
 }
