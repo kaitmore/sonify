@@ -2,12 +2,9 @@ function percent(point, startTime, totalTime) {
   return (point - startTime) / totalTime;
 }
 
-function validateArgs(data, argArray, errMsg) {
-  const isDataFormatted = argArray.every((k, i) => {
-    return k in data[i];
-  });
-
-  if (!isDataFormatted) {
+function validateArgs(dataPoint, properties, errMsg) {
+  const isDataValid = properties.every(prop => dataPoint.hasOwnProperty(prop));
+  if (!isDataValid) {
     throw new Error(errMsg);
     return false;
   }

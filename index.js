@@ -29,17 +29,15 @@ Sonify.prototype._clearContext = function() {
 };
 
 Sonify.prototype.mapNodesToPitches = function(data, threshold) {
-  const isDataFormatted = validateArgs(
-    data,
-    ["time", "value"],
-    "Please format your data with a value and time key"
-  );
-
-  if (!isDataFormatted) return;
-
   const maxDataPoint = _.maxBy(data, "value").value;
   const minDataPoint = _.minBy(data, "value").value;
   return data.map(point => {
+    const isDataFormatted = validateArgs(
+      point,
+      ["value", "time"],
+      "Please format your data with a value and time key"
+    );
+    if (!isDataFormatted) return;
     const percent =
       (point.value - minDataPoint) / (maxDataPoint - minDataPoint);
     return {
@@ -52,20 +50,20 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
 };
 
 Sonify.prototype.mapTimeToNoteLength = function(data) {
-  const isDataFormatted = validateArgs(
-    data,
-    ["time", "value"],
-    "Please format your data with a value and time key"
-  );
-
-  if (!isDataFormatted) return;
-
-  const startTime = _.minBy(data, "time").time; // 1518964287672 ms
-  const endTime = _.maxBy(data, "time").time; // 1522174287672 ms
-  const totalTimeMs = endTime - startTime; // 3210000000 ms
-  const songLength = this.ms_per_songyear * totalTimeMs / MS_PER_YEAR; // 6107 ms
+  const startTime = _.minBy(data, "time").time;
+  const endTime = _.maxBy(data, "time").time;
+  const totalTimeMs = endTime - startTime;
+  const songLength = this.ms_per_songyear * totalTimeMs / MS_PER_YEAR;
   const timedData = [];
+
   for (let i = 0; i < data.length; i++) {
+    const isDataFormatted = validateArgs(
+      data[i],
+      ["value", "time"],
+      "Please format your data with a value and time key"
+    );
+    if (!isDataFormatted) break;
+
     if (i !== data.length - 1) {
       // if we're not on the last loop
       let current = data[i].time;
@@ -90,10 +88,10 @@ Sonify.prototype._createSound = function(freq, nextFreq, noteLength) {
   gainNode.connect(this.context.destination);
   const oscillator = this.context.createOscillator();
 
-  gainNode.gain.setValueAtTime(0.001, this.currentTime);
+  gainNode.gain.setValueAtTime(0.0001, this.currentTime);
   gainNode.gain.exponentialRampToValueAtTime(
     0.5,
-    this.currentTime + noteLength / 8
+    this.currentTime + noteLength / 12
   );
   gainNode.gain.exponentialRampToValueAtTime(
     0.001,
@@ -113,14 +111,6 @@ Sonify.prototype._createSound = function(freq, nextFreq, noteLength) {
 };
 
 Sonify.prototype.play = function(data) {
-  const isDataFormatted = validateArgs(
-    data,
-    ["time", "value", "noteLength"],
-    "Please format your data with time, value, and noteLength keys"
-  );
-
-  if (!isDataFormatted) return;
-
   if (this.context.state === "running") {
     this._clearContext();
   }
@@ -128,7 +118,15 @@ Sonify.prototype.play = function(data) {
   this._setContext();
 
   for (var i = 0; i < data.length; i++) {
+    const isDataFormatted = validateArgs(
+      data[i],
+      ["value", "time", "noteLength"],
+      "Please format your data with time, value, and noteLength keys"
+    );
+    console.log(isDataFormatted);
+    if (!isDataFormatted) break;
     if (i === data.length - 1) break;
+
     const oscillator = this.context.createOscillator();
     var freq = this.pitches[data[i].value];
     var nextFreq = this.pitches[data[i + 1].value];
