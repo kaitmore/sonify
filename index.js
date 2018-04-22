@@ -1,9 +1,10 @@
 import _ from "lodash";
 import notes from "./notes";
+import { validateArgs, percent } from "./helpers";
 
 const MS_PER_YEAR = 31540000000;
 
-class Sonix {
+class Sonify {
   constructor(bpm, sec_per_songyear, octaves = 3, base_octave = 6) {
     this.pitches = _.uniq(_.values(notes));
     this.maxPitch = octaves * 8 + base_octave * 8;
@@ -15,24 +16,32 @@ class Sonix {
   }
 }
 
-Sonix.prototype.setContext = function() {
+Sonify.prototype._setContext = function() {
   this.context = new (window.AudioContext || window.webkitAudioContext)();
   this.currentTime = this.context.currentTime;
 };
 
-Sonix.prototype.clearContext = function() {
+Sonify.prototype._clearContext = function() {
   if (this.context && this.context.state === "running") {
     this.context.close();
     this.currentTime = 0;
   }
 };
 
-Sonix.prototype.mapNodesToPitches = function(data, threshold) {
-  console.log(this.minPitch);
+Sonify.prototype.mapNodesToPitches = function(data, threshold) {
+  const isDataFormatted = validateArgs(
+    data,
+    ["time", "value"],
+    "Please format your data with a value and time key"
+  );
+
+  if (!isDataFormatted) return;
+
   const maxDataPoint = _.maxBy(data, "value").value;
   const minDataPoint = _.minBy(data, "value").value;
   return data.map(point => {
-    let percent = (point.value - minDataPoint) / (maxDataPoint - minDataPoint);
+    const percent =
+      (point.value - minDataPoint) / (maxDataPoint - minDataPoint);
     return {
       ...point,
       value: Math.round(
@@ -42,14 +51,21 @@ Sonix.prototype.mapNodesToPitches = function(data, threshold) {
   });
 };
 
-Sonix.prototype.mapTimeToNoteLength = function(data) {
-  // if(!data.time) {throw new Error("Please format your data with a value and time key")}
+Sonify.prototype.mapTimeToNoteLength = function(data) {
+  const isDataFormatted = validateArgs(
+    data,
+    ["time", "value"],
+    "Please format your data with a value and time key"
+  );
+
+  if (!isDataFormatted) return;
+
   const startTime = _.minBy(data, "time").time; // 1518964287672 ms
   const endTime = _.maxBy(data, "time").time; // 1522174287672 ms
   const totalTimeMs = endTime - startTime; // 3210000000 ms
   const songLength = this.ms_per_songyear * totalTimeMs / MS_PER_YEAR; // 6107 ms
   const timedData = [];
-  for (var i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     if (i !== data.length - 1) {
       // if we're not on the last loop
       let current = data[i].time;
@@ -68,11 +84,8 @@ Sonix.prototype.mapTimeToNoteLength = function(data) {
   return timedData;
 };
 
-function percent(point, startTime, totalTime) {
-  return (point - startTime) / totalTime;
-}
-
-Sonix.prototype.createSound = function(freq, nextFreq, noteLength) {
+Sonify.prototype._createSound = function(freq, nextFreq, noteLength) {
+  console.log(freq, nextFreq, noteLength);
   const gainNode = this.context.createGain();
   gainNode.connect(this.context.destination);
   const oscillator = this.context.createOscillator();
@@ -99,11 +112,21 @@ Sonix.prototype.createSound = function(freq, nextFreq, noteLength) {
   oscillator.connect(gainNode);
 };
 
-Sonix.prototype.play = function(data) {
+Sonify.prototype.play = function(data) {
+  const isDataFormatted = validateArgs(
+    data,
+    ["time", "value", "noteLength"],
+    "Please format your data with time, value, and noteLength keys"
+  );
+
+  if (!isDataFormatted) return;
+
   if (this.context.state === "running") {
-    this.clearContext();
+    this._clearContext();
   }
-  this.setContext();
+
+  this._setContext();
+
   for (var i = 0; i < data.length; i++) {
     if (i === data.length - 1) break;
     const oscillator = this.context.createOscillator();
@@ -111,6 +134,8 @@ Sonix.prototype.play = function(data) {
     var nextFreq = this.pitches[data[i + 1].value];
     var noteLength = data[i].noteLength;
     console.log(
+      "i:",
+      i,
       data[i].value,
       "freq",
       freq,
@@ -119,13 +144,17 @@ Sonix.prototype.play = function(data) {
       "noteLength",
       noteLength
     );
-    this.createSound(freq, nextFreq, noteLength);
+    this._createSound(freq, nextFreq, noteLength);
   }
 };
 
-export default Sonix;
+Sonify.prototype.stop = function() {
+  this._clearContext();
+};
 
-// Sonix.prototype.getPitches = function (octaves = 2) {
+module.exports = Sonify;
+
+// Sonify.prototype.getPitches = function (octaves = 2) {
 //   var noteNames = ["C", "D", "E", "F", "G", "A", "B"];
 //   let pitches = [];
 //   for (var i = 2; i < i + octaves; i++) {
