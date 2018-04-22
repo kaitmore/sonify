@@ -23,6 +23,7 @@ class Sonify {
     this.beats_per_sec = 1 / (bpm / 60);
   }
 }
+
 /**
  * _setContext
  * Creates a new web audio context in the window and sets currentTime
@@ -33,6 +34,7 @@ function _setContext() {
   this.context = new (window.AudioContext || window.webkitAudioContext)();
   this.currentTime = this.context.currentTime;
 }
+
 /**
  * _clearContext
  * Clears the web audio context if the current state is "running"
