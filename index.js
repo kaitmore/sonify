@@ -4,6 +4,14 @@ import { validateArgs, percent } from "./helpers";
 
 const MS_PER_YEAR = 31540000000;
 
+/**
+ * @class Sonify
+ * @param {number} bpm - Beats per minute of the song
+ * @param {number} sec_per_songyear - Number of seconds to represent each year in the source data
+ * @param {number} octaves - Number of octaves that the song should span
+ * @param {number} base_octave - Base octave
+ * @return {Sonify} - A Sonify object
+ */
 class Sonify {
   constructor(bpm, sec_per_songyear, octaves = 3, base_octave = 6) {
     this.pitches = _.uniq(_.values(notes));
@@ -16,11 +24,23 @@ class Sonify {
   }
 }
 
+/**
+ * _setContext
+ * Creates a new web audio context in the window and sets currentTime
+ * to the newly created context's currentTime
+ * @return {void}
+ */
 Sonify.prototype._setContext = function() {
   this.context = new (window.AudioContext || window.webkitAudioContext)();
   this.currentTime = this.context.currentTime;
 };
 
+/**
+ * _clearContext
+ * Clears the web audio context if the current state is "running"
+ * and resets the internal currentTime to 0
+ * @return {void}
+ */
 Sonify.prototype._clearContext = function() {
   if (this.context && this.context.state === "running") {
     this.context.close();
@@ -28,6 +48,16 @@ Sonify.prototype._clearContext = function() {
   }
 };
 
+/**
+ * mapNodesToPitches
+ * Take an array of data point objects with the keys "time" and "value" and
+ * return a transformed object with a "value" property representing a pitch within
+ * the given octave range
+ * @param {Array<Object>} data - An array of data point objects
+ * @param {string} data[].value - Integer value of the data point
+ * @param {string} data[].time - Unix timestamp value
+ * @return {Array<Object>} - An array of data point objects
+ */
 Sonify.prototype.mapNodesToPitches = function(data, threshold) {
   const maxDataPoint = _.maxBy(data, "value").value;
   const minDataPoint = _.minBy(data, "value").value;
@@ -49,6 +79,16 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
   });
 };
 
+/**
+ * mapTimeToNoteLength
+ * Take an array of data point objects with the keys "time" and "value" and
+ * return a transformed object with a "noteLength" property that represents
+ * a note length in beats per second
+ * @param {Array<Object>} data - An array of data point objects
+ * @param {string} data[].value - Integer value of the data point
+ * @param {string} data[].time - Unix timestamp value
+ * @return {Array<Object>} - An array of data point objects
+ */
 Sonify.prototype.mapTimeToNoteLength = function(data) {
   const startTime = _.minBy(data, "time").time;
   const endTime = _.maxBy(data, "time").time;
@@ -82,13 +122,23 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
   return timedData;
 };
 
+/**
+ * _createSound
+ * Takes two frequencies and a note length (in beats) and
+ * creates a gain and oscillator node.
+ * @param {Array<Object>} data - An array of data point objects
+ * @param {string} data[].value - Integer value of the data point
+ * @param {string} data[].time - Unix timestamp value
+ * @return {Array<Object>} - An array of data point objects
+ */
 Sonify.prototype._createSound = function(freq, nextFreq, noteLength) {
-  console.log(freq, nextFreq, noteLength);
   const gainNode = this.context.createGain();
   gainNode.connect(this.context.destination);
   const oscillator = this.context.createOscillator();
 
-  gainNode.gain.setValueAtTime(0.0001, this.currentTime);
+  // The following stanza sets the gain value low at the beginning and ends of a note
+  // to mitigate the clicking sound from starting and stopping the oscillator node.
+  gainNode.gain.setValueAtTime(0.001, this.currentTime);
   gainNode.gain.exponentialRampToValueAtTime(
     0.5,
     this.currentTime + noteLength / 12
@@ -110,6 +160,16 @@ Sonify.prototype._createSound = function(freq, nextFreq, noteLength) {
   oscillator.connect(gainNode);
 };
 
+/**
+ * play
+ * Maps through data with keys "value", "time", and "noteLength", and
+ * calls this._createSound to create the appropriate nodes
+ * @param {Array<Object>} data - An array of data point objects
+ * @param {string} data[].value - Integer value of the data point representing a pitch
+ * @param {string} data[].time - Unix timestamp value
+ * @param {string} data[].noteLength - Interger value that represents a note length in beats per second
+ * @returns {void}
+ */
 Sonify.prototype.play = function(data) {
   if (this.context.state === "running") {
     this._clearContext();
@@ -123,7 +183,6 @@ Sonify.prototype.play = function(data) {
       ["value", "time", "noteLength"],
       "Please format your data with time, value, and noteLength keys"
     );
-    console.log(isDataFormatted);
     if (!isDataFormatted) break;
     if (i === data.length - 1) break;
 
@@ -131,35 +190,17 @@ Sonify.prototype.play = function(data) {
     var freq = this.pitches[data[i].value];
     var nextFreq = this.pitches[data[i + 1].value];
     var noteLength = data[i].noteLength;
-    console.log(
-      "i:",
-      i,
-      data[i].value,
-      "freq",
-      freq,
-      "nextFreq",
-      nextFreq,
-      "noteLength",
-      noteLength
-    );
     this._createSound(freq, nextFreq, noteLength);
   }
 };
 
+/**
+ * stop
+ * Calls internal _clearContext
+ * @returns {void}
+ */
 Sonify.prototype.stop = function() {
   this._clearContext();
 };
 
 module.exports = Sonify;
-
-// Sonify.prototype.getPitches = function (octaves = 2) {
-//   var noteNames = ["C", "D", "E", "F", "G", "A", "B"];
-//   let pitches = [];
-//   for (var i = 2; i < i + octaves; i++) {
-//     for (var j = 0; j < noteNames.length; j++) {
-//       console.log(notes[`${noteNames[j]}${i}`])
-//       pitches.push(notes[`${noteNames[j]}${i}`])
-//     }
-//   }
-//   this.pitches = pitches;
-// };
