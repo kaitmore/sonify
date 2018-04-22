@@ -170,7 +170,7 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
  */
 Sonify.prototype.play = function(data) {
   if (this.context.state === "running") {
-    this._clearContext();
+    _clearContext.call(this);
   }
 
   _setContext.call(this);
