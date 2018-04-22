@@ -20,14 +20,14 @@ class Sonify {
     this.context = {};
     this.currentTime = 0;
     this.ms_per_songyear = sec_per_songyear * 1000;
-    this.beats_per_sec = 1 / (bpm / 60);
+    this.beats_per_sec = bpm / 60;
   }
 }
 
 /**
  * _setContext
  * Creates a new web audio context in the window and sets currentTime
- * to the newly created context's currentTime
+ * equal to the newly created context's currentTime
  * @return {void}
  */
 function _setContext() {
@@ -64,6 +64,7 @@ function _createSound(freq, nextFreq, noteLength) {
 
   // The following stanza sets the gain value low at the beginning and ends of a note
   // to mitigate the clicking sound from starting and stopping the oscillator node.
+
   // gainNode.gain.setValueAtTime(0.001, this.currentTime);
   // gainNode.gain.exponentialRampToValueAtTime(
   //   0.5,
@@ -75,10 +76,10 @@ function _createSound(freq, nextFreq, noteLength) {
   // );
 
   oscillator.frequency.setValueAtTime(freq, this.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(
-    nextFreq,
-    this.currentTime + noteLength
-  );
+  // oscillator.frequency.exponentialRampToValueAtTime(
+  //   nextFreq,
+  //   this.currentTime + noteLength
+  // );
   oscillator.start(this.currentTime);
   oscillator.stop(this.currentTime + noteLength);
 
@@ -149,7 +150,7 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
       let currentPointInSong =
         percent(current, startTime, totalTimeMs) * songLength;
       let nextPointInSong = percent(next, startTime, totalTimeMs) * songLength;
-      let noteLengthSecs = (nextPointInSong - currentPointInSong) / 60;
+      let noteLengthSecs = (nextPointInSong - currentPointInSong) / 1000;
       let beats = this.beats_per_sec * noteLengthSecs;
 
       timedData.push({ ...data[i], noteLength: beats });
