@@ -7,20 +7,20 @@ const MS_PER_YEAR = 31540000000;
 /**
  * @class Sonify
  * @param {number} bpm - Beats per minute of the song
- * @param {number} sec_per_songyear - Number of seconds to represent each year in the source data
+ * @param {number} secPerSongYear - Number of seconds to represent each year in the source data
  * @param {number} octaves - Number of octaves that the song should span
- * @param {number} base_octave - Base octave
+ * @param {number} baseOctave - Base octave
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
-  constructor(bpm, sec_per_songyear, octaves = 3, base_octave = 6) {
+  constructor(bpm, secPerSongYear = 5, octaves = 3, baseOctave = 6) {
     this.pitches = _.uniq(_.values(notes));
-    this.maxPitch = octaves * 8 + base_octave * 8;
-    this.minPitch = base_octave * 8;
+    this.maxPitch = octaves * 8 + baseOctave * 8;
+    this.minPitch = baseOctave * 8;
     this.context = {};
     this.currentTime = 0;
-    this.ms_per_songyear = sec_per_songyear * 1000;
-    this.beats_per_sec = bpm / 60;
+    this.secPerSongYear = secPerSongYear;
+    this.beatsPerSec = bpm / 60;
   }
 }
 
@@ -59,23 +59,16 @@ function _clearContext() {
  */
 function _createSound(freq, nextFreq, noteLength) {
   const gainNode = this.context.createGain();
-  gainNode.connect(this.context.destination);
   const oscillator = this.context.createOscillator();
-
   // The following stanza sets the gain value low at the beginning and ends of a note
   // to mitigate the clicking sound from starting and stopping the oscillator node.
 
   // gainNode.gain.setValueAtTime(0.001, this.currentTime);
-  // gainNode.gain.exponentialRampToValueAtTime(
-  //   0.5,
-  //   this.currentTime + noteLength / 12
-  // );
-  // gainNode.gain.exponentialRampToValueAtTime(
-  //   0.001,
-  //   this.currentTime + noteLength
-  // );
+  // gainNode.gain.exponentialRampToValueAtTime(0.5, this.currentTime + 0.01);
+  gainNode.gain.linearRampToValueAtTime(0, this.currentTime + noteLength + 0.1);
 
   oscillator.frequency.setValueAtTime(freq, this.currentTime);
+
   // oscillator.frequency.exponentialRampToValueAtTime(
   //   nextFreq,
   //   this.currentTime + noteLength
@@ -85,6 +78,7 @@ function _createSound(freq, nextFreq, noteLength) {
 
   this.currentTime += noteLength;
   oscillator.connect(gainNode);
+  gainNode.connect(this.context.destination);
 }
 
 /**
@@ -129,10 +123,10 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
  * @return {Array<Object>} - An array of data point objects
  */
 Sonify.prototype.mapTimeToNoteLength = function(data) {
-  const startTime = _.minBy(data, "time").time;
-  const endTime = _.maxBy(data, "time").time;
-  const totalTimeMs = endTime - startTime;
-  const songLength = this.ms_per_songyear * totalTimeMs / MS_PER_YEAR;
+  const startTime = _.minBy(data, "time").time * 1000;
+  const endTime = _.maxBy(data, "time").time * 1000;
+  const totalTime = endTime - startTime;
+  const songLength = this.secPerSongYear * totalTime / MS_PER_YEAR;
   const timedData = [];
 
   for (let i = 0; i < data.length; i++) {
@@ -148,12 +142,10 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
       let current = data[i].time;
       let next = data[i + 1].time;
       let currentPointInSong =
-        percent(current, startTime, totalTimeMs) * songLength;
-      let nextPointInSong = percent(next, startTime, totalTimeMs) * songLength;
-      let noteLengthSecs = (nextPointInSong - currentPointInSong) / 1000;
-      let beats = this.beats_per_sec * noteLengthSecs;
-
-      timedData.push({ ...data[i], noteLength: beats });
+        percent(current, startTime, totalTime) * songLength;
+      let nextPointInSong = percent(next, startTime, totalTime) * songLength;
+      let noteLengthSecs = nextPointInSong - currentPointInSong;
+      timedData.push({ ...data[i], noteLength: noteLengthSecs });
     } else {
       timedData.push({ ...data[i], noteLength: 1 });
     }
@@ -187,10 +179,9 @@ Sonify.prototype.play = function(data) {
     if (!isDataFormatted) break;
     if (i === data.length - 1) break;
 
-    const oscillator = this.context.createOscillator();
-    var freq = this.pitches[data[i].value];
-    var nextFreq = this.pitches[data[i + 1].value];
-    var noteLength = data[i].noteLength;
+    const freq = this.pitches[data[i].value];
+    const nextFreq = this.pitches[data[i + 1].value];
+    const noteLength = data[i].noteLength;
     _createSound.apply(this, [freq, nextFreq, noteLength]);
   }
 };
