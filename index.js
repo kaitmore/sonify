@@ -62,15 +62,13 @@ function _createSound(freq, nextFreq, noteLength) {
   const gainNode = this.context.createGain();
   const oscillator = this.context.createOscillator();
 
-  // The following stanza sets the gain value low at the beginning and ends of a note
+  // The following stanza sets the gain value low at the end of a note
   // to mitigate the clicking sound from starting and stopping the oscillator node.
-  // gainNode.gain.setValueAtTime(0.001, this.currentTime);
-  // gainNode.gain.exponentialRampToValueAtTime(0.5, this.currentTime + 0.01);
-  gainNode.gain.linearRampToValueAtTime(0, this.currentTime + noteLength + 0.1);
+  gainNode.gain.linearRampToValueAtTime(0, this.currentTime + noteLength);
 
   oscillator.frequency.setValueAtTime(freq, this.currentTime);
 
-  oscillator.frequency.exponentialRampToValueAtTime(
+  oscillator.frequency.linearRampToValueAtTime(
     nextFreq,
     this.currentTime + noteLength
   );
@@ -105,7 +103,6 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
     if (!isDataFormatted) return;
     const percent =
       (point.value - minDataPoint) / (maxDataPoint - minDataPoint);
-    console.log(this.pitches);
     return {
       ...point,
       value: Math.round(
