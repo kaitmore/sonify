@@ -13,14 +13,16 @@ const MS_PER_YEAR = 31540000000;
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
-  constructor(bpm, secPerSongYear = 5, octaves = 3, baseOctave = 6) {
+  constructor(secPerSongYear = 5, octaves = 3, baseOctave = 6) {
+    if (baseOctave + octaves > 9) {
+      throw new Error("Base octave must be no more than 9 - octaves");
+    }
     this.pitches = _.uniq(_.values(notes));
     this.maxPitch = octaves * 8 + baseOctave * 8;
     this.minPitch = baseOctave * 8;
     this.context = {};
     this.currentTime = 0;
     this.secPerSongYear = secPerSongYear;
-    this.beatsPerSec = bpm / 60;
   }
 }
 
@@ -60,19 +62,20 @@ function _clearContext() {
 function _createSound(freq, nextFreq, noteLength) {
   const gainNode = this.context.createGain();
   const oscillator = this.context.createOscillator();
+
   // The following stanza sets the gain value low at the beginning and ends of a note
   // to mitigate the clicking sound from starting and stopping the oscillator node.
-
   // gainNode.gain.setValueAtTime(0.001, this.currentTime);
   // gainNode.gain.exponentialRampToValueAtTime(0.5, this.currentTime + 0.01);
   gainNode.gain.linearRampToValueAtTime(0, this.currentTime + noteLength + 0.1);
 
   oscillator.frequency.setValueAtTime(freq, this.currentTime);
 
-  // oscillator.frequency.exponentialRampToValueAtTime(
-  //   nextFreq,
-  //   this.currentTime + noteLength
-  // );
+  oscillator.frequency.exponentialRampToValueAtTime(
+    nextFreq,
+    this.currentTime + noteLength
+  );
+
   oscillator.start(this.currentTime);
   oscillator.stop(this.currentTime + noteLength);
 
@@ -178,7 +181,6 @@ Sonify.prototype.play = function(data) {
     );
     if (!isDataFormatted) break;
     if (i === data.length - 1) break;
-
     const freq = this.pitches[data[i].value];
     const nextFreq = this.pitches[data[i + 1].value];
     const noteLength = data[i].noteLength;

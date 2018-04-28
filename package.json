@@ -7,8 +7,14 @@
     "test": "npm test",
     "build": "babel index.js -o build.js"
   },
-  "files": ["build.js"],
-  "keywords": ["music", "data", "sonification"],
+  "files": [
+    "build.js"
+  ],
+  "keywords": [
+    "music",
+    "data",
+    "sonification"
+  ],
   "author": "Kaitlin Moreno",
   "license": "ISC",
   "dependencies": {
