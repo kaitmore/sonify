@@ -6,7 +6,6 @@ const MS_PER_YEAR = 31540000000;
 
 /**
  * @class Sonify
- * @param {number} bpm - Beats per minute of the song
  * @param {number} secPerSongYear - Number of seconds to represent each year in the source data
  * @param {number} octaves - Number of octaves that the song should span
  * @param {number} baseOctave - Base octave
@@ -106,6 +105,7 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
     if (!isDataFormatted) return;
     const percent =
       (point.value - minDataPoint) / (maxDataPoint - minDataPoint);
+    console.log(this.pitches);
     return {
       ...point,
       value: Math.round(
@@ -119,7 +119,7 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
  * mapTimeToNoteLength
  * Take an array of data point objects with the keys "time" and "value" and
  * return a transformed object with a "noteLength" property that represents
- * a note length in beats per second
+ * a note length in seconds
  * @param {Array<Object>} data - An array of data point objects
  * @param {string} data[].value - Integer value of the data point
  * @param {string} data[].time - Unix timestamp value
