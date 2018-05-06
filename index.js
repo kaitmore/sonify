@@ -1,6 +1,6 @@
 import _ from "lodash";
+import { percent, validateArgs } from "./helpers";
 import notes from "./notes";
-import { validateArgs, percent } from "./helpers";
 
 const MS_PER_YEAR = 31540000000;
 
@@ -26,7 +26,6 @@ class Sonify {
 }
 
 /**
- * _setContext
  * Creates a new web audio context in the window and sets currentTime
  * equal to the newly created context's currentTime
  * @return {void}
@@ -37,7 +36,6 @@ function _setContext() {
 }
 
 /**
- * _clearContext
  * Clears the web audio context if the current state is "running"
  * and resets the internal currentTime to 0
  * @return {void}
@@ -50,7 +48,6 @@ function _clearContext() {
 }
 
 /**
- * _createSound
  * Takes two frequencies and a note length (in beats) and
  * creates a gain and oscillator node.
  * @param {Array<Object>} data - An array of data point objects
@@ -58,13 +55,8 @@ function _clearContext() {
  * @param {string} data[].time - Unix timestamp value
  * @return {Array<Object>} - An array of data point objects
  */
-function _createSound(freq, nextFreq, noteLength) {
-  const gainNode = this.context.createGain();
-  const oscillator = this.context.createOscillator();
-
-  // The following stanza sets the gain value low at the end of a note
-  // to mitigate the clicking sound from starting and stopping the oscillator node.
-  gainNode.gain.linearRampToValueAtTime(0, this.currentTime + noteLength);
+function _createSound(freq, nextFreq, noteLength, gainNode, oscillator) {
+  gainNode.gain.setTargetAtTime(1, this.currentTime, 0.00015);
 
   oscillator.frequency.setValueAtTime(freq, this.currentTime);
 
@@ -72,13 +64,9 @@ function _createSound(freq, nextFreq, noteLength) {
     nextFreq,
     this.currentTime + noteLength
   );
-
-  oscillator.start(this.currentTime);
-  oscillator.stop(this.currentTime + noteLength);
+  gainNode.gain.setTargetAtTime(0, this.currentTime + noteLength, 0.00015);
 
   this.currentTime += noteLength;
-  oscillator.connect(gainNode);
-  gainNode.connect(this.context.destination);
 }
 
 /**
@@ -113,7 +101,6 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
 };
 
 /**
- * mapTimeToNoteLength
  * Take an array of data point objects with the keys "time" and "value" and
  * return a transformed object with a "noteLength" property that represents
  * a note length in seconds
@@ -154,7 +141,6 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
 };
 
 /**
- * play
  * Maps through data with keys "value", "time", and "noteLength", and
  * calls this._createSound to create the appropriate nodes
  * @param {Array<Object>} data - An array of data point objects
@@ -170,6 +156,12 @@ Sonify.prototype.play = function(data) {
 
   _setContext.call(this);
 
+  this.gainNode = this.context.createGain();
+  this.oscillator = this.context.createOscillator();
+  this.oscillator.connect(this.gainNode);
+  this.gainNode.connect(this.context.destination);
+  this.oscillator.start(this.currentTime);
+
   for (var i = 0; i < data.length; i++) {
     const isDataFormatted = validateArgs(
       data[i],
@@ -181,16 +173,22 @@ Sonify.prototype.play = function(data) {
     const freq = this.pitches[data[i].value];
     const nextFreq = this.pitches[data[i + 1].value];
     const noteLength = data[i].noteLength;
-    _createSound.apply(this, [freq, nextFreq, noteLength]);
+    _createSound.apply(this, [
+      freq,
+      nextFreq,
+      noteLength,
+      this.gainNode,
+      this.oscillator
+    ]);
   }
 };
 
 /**
- * stop
  * Calls internal _clearContext
  * @returns {void}
  */
 Sonify.prototype.stop = function() {
+  this.gainNode.gain.value = 0;
   _clearContext.call(this);
 };
 
