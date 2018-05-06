@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { percent, validateArgs } from "./helpers";
 import notes from "./notes";
+
 const MS_PER_YEAR = 31540000000;
 
 /**
@@ -55,16 +56,17 @@ function _clearContext() {
  * @return {Array<Object>} - An array of data point objects
  */
 function _createSound(freq, nextFreq, noteLength) {
-  this.gainNode.gain.setTargetAtTime(1, this.currentTime, 0.00015);
-
+  // Schedule the current frequency
   this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
 
+  // Schedule a gradual, linear change in frequency from the current
+  // pitch to the next that spans the noteLength value
   this.oscillator.frequency.linearRampToValueAtTime(
     nextFreq,
     this.currentTime + noteLength
   );
-  this.gainNode.gain.setTargetAtTime(0, this.currentTime + noteLength, 0.00015);
 
+  // Move the currentTime forward
   this.currentTime += noteLength;
 }
 
@@ -153,12 +155,18 @@ Sonify.prototype.play = function(data) {
     _clearContext.call(this);
   }
 
+  // Create the audio context
   _setContext.call(this);
 
+  // Create gain and oscillator nodes
   this.gainNode = this.context.createGain();
   this.oscillator = this.context.createOscillator();
+
+  // Connect the oscillator and gain to the context destination
   this.oscillator.connect(this.gainNode);
   this.gainNode.connect(this.context.destination);
+
+  // Start the oscillator node
   this.oscillator.start(this.currentTime);
 
   for (var i = 0; i < data.length; i++) {
