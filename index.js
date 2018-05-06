@@ -54,16 +54,16 @@ function _clearContext() {
  * @param {string} data[].time - Unix timestamp value
  * @return {Array<Object>} - An array of data point objects
  */
-function _createSound(freq, nextFreq, noteLength, gainNode, oscillator) {
-  gainNode.gain.setTargetAtTime(1, this.currentTime, 0.00015);
+function _createSound(freq, nextFreq, noteLength) {
+  this.gainNode.gain.setTargetAtTime(1, this.currentTime, 0.00015);
 
-  oscillator.frequency.setValueAtTime(freq, this.currentTime);
+  this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
 
-  oscillator.frequency.linearRampToValueAtTime(
+  this.oscillator.frequency.linearRampToValueAtTime(
     nextFreq,
     this.currentTime + noteLength
   );
-  gainNode.gain.setTargetAtTime(0, this.currentTime + noteLength, 0.00015);
+  this.gainNode.gain.setTargetAtTime(0, this.currentTime + noteLength, 0.00015);
 
   this.currentTime += noteLength;
 }
@@ -172,13 +172,7 @@ Sonify.prototype.play = function(data) {
     const freq = this.pitches[data[i].value];
     const nextFreq = this.pitches[data[i + 1].value];
     const noteLength = data[i].noteLength;
-    _createSound.apply(this, [
-      freq,
-      nextFreq,
-      noteLength,
-      this.gainNode,
-      this.oscillator
-    ]);
+    _createSound.apply(this, [freq, nextFreq, noteLength]);
   }
 };
 
