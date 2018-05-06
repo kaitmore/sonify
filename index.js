@@ -1,7 +1,6 @@
 import _ from "lodash";
 import { percent, validateArgs } from "./helpers";
 import notes from "./notes";
-
 const MS_PER_YEAR = 31540000000;
 
 /**
@@ -188,7 +187,6 @@ Sonify.prototype.play = function(data) {
  * @returns {void}
  */
 Sonify.prototype.stop = function() {
-  this.gainNode.gain.value = 0;
   _clearContext.call(this);
 };
 
