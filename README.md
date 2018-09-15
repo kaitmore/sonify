@@ -24,30 +24,42 @@ Sonifier.play(timedData)
 ## API
 
 ### Sonify
+{number} **secPerSongYear** - Number of seconds to represent each year in the source data
 
-* @param {number}  **secPerSongYear** - Number of seconds to represent each year in the source data
-* @param {number}  **octaves** - Number of octaves that the song should span
-* @param {number}  **baseOctave** - Base octave
+{number} **octaves** - Number of octaves that the song should span
+
+{number} **baseOctave** - Base octave
 
 ### Sonify.prototype.mapNodesToPitches
 Take an array of data point objects with the keys "time" and "value" and return a transformed object with a "value" property representing a pitch within the given octave range
 
-* @param {Array<Object>} **data** An array of data point objects
-* @param {string} **data[].value** Integer value of the data point
-* @param {string} **data[].time** Unix timestamp value
-* @return {Array<Object>} An array of data point objects
+{Array<Object>} **data** - An array of data point objects
+
+{string} **data[].value** - Integer value of the data point
+
+{string} **data[].time** - Unix timestamp value
+
+returns {Array<Object>} - An array of data point objects
 
 ### Sonify.prototype.mapTimeToNoteLength
 
 Take an array of data point objects with the keys "time" and "value" and return a transformed object with a "noteLength" property that represents a note length in seconds
-* @param {Array<Object>}  **data** - An array of data point objects
-* @param {string} data[].value - Integer value of the data point
-* @param {string} data[].time - Unix timestamp value
-* @return {Array<Object>} - An array of data point objects
+
+{Array<Object>}  **data** - An array of data point objects
+
+{string} **data[].value** - Integer value of the data point
+
+{string} **data[].time** - Unix timestamp value
+
+returns {Array<Object>} - An array of data point objects
 
 ### Sonify.prototype.play
-* @param {Array<Object>} **data** - An array of data point objects
-* @param {string} data[].value - Integer value of the data point representing a pitch
-* @param {string} data[].time - Unix timestamp value
-* @param {string} data[].noteLength - Interger value that represents a note length in beats per second
-* @returns {void}
+{Array<Object>} **data** - An array of data point objects
+
+{string} **data[].value** - Integer value of the data point representing a pitch
+
+{string} **data[].time** - Unix timestamp value
+
+{string} **data[].noteLength** - Interger value that represents a note length in beats per second
+
+returns {void}
