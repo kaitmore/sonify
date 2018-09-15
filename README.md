@@ -18,7 +18,7 @@ const pitches = Sonifier.mapNodesToPitches(rawData)
 
 const timedData = Sonifier.mapTimeToNoteLength(pitches);
 
-Sonifier.play()
+Sonifier.play(timedData)
 ```
 
 ## API
