@@ -6,13 +6,15 @@ const MS_PER_YEAR = 31540000000;
 
 /**
  * @class Sonify
- * @param {number} secPerSongYear - Number of seconds to represent each year in the source data
- * @param {number} octaves - Number of octaves that the song should span
- * @param {number} baseOctave - Base octave
+ * @param {Array<Array<number>>} data - Two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
+ * @param {number} songLength - Length of the generated song in seconds
+ * @param {Object} options
+ * @param {number} options.octaves - Number of octaves that the song should span
+ * @param {number} options.baseOctave - Base octave
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
-  constructor(data, options, secPerSongYear = 5, octaves = 3, baseOctave = 6) {
+  constructor(data, songLength, { octaves = 3, baseOctave = 6 }) {
     if (baseOctave + octaves > 9) {
       throw new Error("Base octave must be no more than 9 - octaves");
     }
@@ -21,22 +23,22 @@ class Sonify {
     this.minPitch = baseOctave * 8;
     this.context = {};
     this.currentTime = 0;
-    this.secPerSongYear = secPerSongYear;
-    this.data = this._transform(data);
+    this.songLength = songLength;
+
+    const transformedData = _transform.call(this, data);
+    this.data = transformedData;
   }
 }
 
-Sonify.prototype._transform = function(data) {
+function _transform(data) {
   // Sort data by timestamp
   data.sort(([a], [b]) => a - b);
 
-  const pitchedData = this.mapNodesToPitches(data);
-  const timedData = this.mapTimeToNoteLength(pitchedData);
-
-  console.log("transformed", timedData);
+  const pitchedData = _mapNodesToPitches.call(this, data);
+  const timedData = _mapTimeToNoteLength.call(this, pitchedData);
 
   return timedData;
-};
+}
 
 /**
  * Creates a new web audio context in the window and sets currentTime
@@ -93,7 +95,7 @@ function _createSound(freq, nextFreq, noteLength) {
  * @param {string} data[].time - Unix timestamp value
  * @return {Array<Object>} - An array of data point objects
  */
-Sonify.prototype.mapNodesToPitches = function(data, threshold) {
+function _mapNodesToPitches(data) {
   const minDataPoint = _.minBy(data, x => x[1])[1];
   const maxDataPoint = _.maxBy(data, x => x[1])[1];
 
@@ -104,7 +106,7 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
       Math.round(percent * (this.maxPitch - this.minPitch) + this.minPitch)
     ];
   });
-};
+}
 
 /**
  * Take an array of data point objects with the keys "time" and "value" and
@@ -115,11 +117,11 @@ Sonify.prototype.mapNodesToPitches = function(data, threshold) {
  * @param {string} data[].time - Unix timestamp value
  * @return {Array<Object>} - An array of data point objects
  */
-Sonify.prototype.mapTimeToNoteLength = function(data) {
-  const startTime = data[0][0] * 1000;
-  const endTime = data[data.length - 1][0] * 1000;
+function _mapTimeToNoteLength(data) {
+  const startTime = data[0][0];
+  const endTime = data[data.length - 1][0];
   const totalTime = endTime - startTime;
-  const songLength = this.secPerSongYear * totalTime / MS_PER_YEAR;
+  const songLength = this.songLength;
   const timedData = [];
 
   for (let i = 0; i < data.length; i++) {
@@ -137,7 +139,7 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
     }
   }
   return timedData;
-};
+}
 
 /**
  * Maps through data with keys "value", "time", and "noteLength", and
@@ -148,7 +150,7 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
  * @param {string} data[].noteLength - Interger value that represents a note length in beats per second
  * @returns {void}
  */
-Sonify.prototype.play = function(data) {
+Sonify.prototype.play = function() {
   if (this.context.state === "running") {
     _clearContext.call(this);
   }
@@ -169,17 +171,11 @@ Sonify.prototype.play = function(data) {
 
   let noteLength, freq, nextFreq;
 
-  for (let i = 0; i < data.length; i++) {
-    const isDataFormatted = validateArgs(
-      data[i],
-      ["value", "time", "noteLength"],
-      "Please format your data with time, value, and noteLength keys"
-    );
-    if (!isDataFormatted) break;
-    if (i === data.length - 1) break;
-    freq = this.pitches[data[i].value];
-    nextFreq = this.pitches[data[i + 1].value];
-    noteLength = data[i].noteLength;
+  for (let i = 0; i < this.data.length; i++) {
+    if (i === this.data.length - 1) break;
+    freq = this.pitches[this.data[i][1]];
+    nextFreq = this.pitches[this.data[i + 1][1]];
+    noteLength = this.data[i].noteLength;
     _createSound.apply(this, [freq, nextFreq, noteLength]);
   }
 
