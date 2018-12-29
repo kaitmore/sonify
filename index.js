@@ -135,7 +135,7 @@ Sonify.prototype.mapTimeToNoteLength = function(data) {
       let noteLengthSecs = nextPointInSong - currentPointInSong;
       timedData.push({ ...data[i], noteLength: noteLengthSecs });
     } else {
-      timedData.push({ ...data[i], noteLength: 1 });
+      timedData.push({ ...data[i], noteLength: 0 });
     }
   }
   return timedData;
@@ -169,7 +169,9 @@ Sonify.prototype.play = function(data) {
   // Start the oscillator node
   this.oscillator.start(this.currentTime);
 
-  for (var i = 0; i < data.length; i++) {
+  let noteLength, freq, nextFreq;
+
+  for (let i = 0; i < data.length; i++) {
     const isDataFormatted = validateArgs(
       data[i],
       ["value", "time", "noteLength"],
@@ -177,11 +179,13 @@ Sonify.prototype.play = function(data) {
     );
     if (!isDataFormatted) break;
     if (i === data.length - 1) break;
-    const freq = this.pitches[data[i].value];
-    const nextFreq = this.pitches[data[i + 1].value];
-    const noteLength = data[i].noteLength;
+    freq = this.pitches[data[i].value];
+    nextFreq = this.pitches[data[i + 1].value];
+    noteLength = data[i].noteLength;
     _createSound.apply(this, [freq, nextFreq, noteLength]);
   }
+
+  this.oscillator.stop(this.currentTime);
 };
 
 /**
@@ -192,4 +196,4 @@ Sonify.prototype.stop = function() {
   _clearContext.call(this);
 };
 
-module.exports = Sonify;
+export default Sonify;
