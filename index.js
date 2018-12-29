@@ -2,7 +2,7 @@ import _ from "lodash";
 import { percent, validateArgs } from "./helpers";
 import notes from "./notes";
 
-const MS_PER_YEAR = 31540000000;
+const pitches = _.uniq(_.values(notes));
 
 /**
  * @class Sonify
@@ -18,7 +18,6 @@ class Sonify {
     if (baseOctave + octaves > 9) {
       throw new Error("Base octave must be no more than 9 - octaves");
     }
-    this.pitches = _.uniq(_.values(notes));
     this.maxPitch = octaves * 8 + baseOctave * 8;
     this.minPitch = baseOctave * 8;
     this.context = {};
@@ -36,8 +35,16 @@ function _transform(data) {
 
   const pitchedData = _mapNodesToPitches.call(this, data);
   const timedData = _mapTimeToNoteLength.call(this, pitchedData);
+  const transformedData = _format(timedData);
+  console.log(transformedData);
+  return transformedData;
+}
 
-  return timedData;
+function _format(data) {
+  return data.map(([, pitch, noteLength]) => ({
+    pitch,
+    noteLength
+  }));
 }
 
 /**
@@ -100,10 +107,10 @@ function _mapNodesToPitches(data) {
   const maxDataPoint = _.maxBy(data, x => x[1])[1];
 
   return data.map(point => {
-    const percent = (point[1] - minDataPoint) / (maxDataPoint - minDataPoint);
+    const factor = percent(point[1], minDataPoint, maxDataPoint - minDataPoint);
     return [
       point[0],
-      Math.round(percent * (this.maxPitch - this.minPitch) + this.minPitch)
+      Math.round(factor * (this.maxPitch - this.minPitch) + this.minPitch)
     ];
   });
 }
@@ -121,33 +128,26 @@ function _mapTimeToNoteLength(data) {
   const startTime = data[0][0];
   const endTime = data[data.length - 1][0];
   const totalTime = endTime - startTime;
-  const songLength = this.songLength;
-  const timedData = [];
 
-  for (let i = 0; i < data.length; i++) {
+  return data.map((point, i) => {
     if (i !== data.length - 1) {
-      // if we're not on the last loop
-      let current = data[i][0];
-      let next = data[i + 1][0];
+      let currentTimestamp = point[0];
+      let nextTimestamp = data[i + 1][0];
       let currentPointInSong =
-        percent(current, startTime, totalTime) * songLength;
-      let nextPointInSong = percent(next, startTime, totalTime) * songLength;
+        percent(currentTimestamp, startTime, totalTime) * this.songLength;
+      let nextPointInSong =
+        percent(nextTimestamp, startTime, totalTime) * this.songLength;
       let noteLengthSecs = nextPointInSong - currentPointInSong;
-      timedData.push({ ...data[i], noteLength: noteLengthSecs });
+      return [...point, noteLengthSecs];
     } else {
-      timedData.push({ ...data[i], noteLength: 0 });
+      return [...point, 0];
     }
-  }
-  return timedData;
+  });
 }
 
 /**
- * Maps through data with keys "value", "time", and "noteLength", and
- * calls this._createSound to create the appropriate nodes
- * @param {Array<Object>} data - An array of data point objects
- * @param {string} data[].value - Integer value of the data point representing a pitch
- * @param {string} data[].time - Unix timestamp value
- * @param {string} data[].noteLength - Interger value that represents a note length in beats per second
+ * Creates the audio context and necessary nodes. Maps through this.data and
+ * calls this._createSound to schedule and play the appropriate notes
  * @returns {void}
  */
 Sonify.prototype.play = function() {
@@ -169,14 +169,18 @@ Sonify.prototype.play = function() {
   // Start the oscillator node
   this.oscillator.start(this.currentTime);
 
-  let noteLength, freq, nextFreq;
+  let freq, nextFreq;
 
   for (let i = 0; i < this.data.length; i++) {
+    // If we're on the last data point, exit the loop
     if (i === this.data.length - 1) break;
-    freq = this.pitches[this.data[i][1]];
-    nextFreq = this.pitches[this.data[i + 1][1]];
-    noteLength = this.data[i].noteLength;
-    _createSound.apply(this, [freq, nextFreq, noteLength]);
+
+    // Lookup frequencies using the pitch number
+    freq = pitches[this.data[i].pitch];
+    nextFreq = pitches[this.data[i + 1].pitch];
+
+    // Call create sound with frequencies and note length
+    _createSound.call(this, freq, nextFreq, this.data[i].noteLength);
   }
 
   this.oscillator.stop(this.currentTime);
