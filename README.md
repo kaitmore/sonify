@@ -2,6 +2,8 @@
 
 A module that allows you to sonify timeseries data. The Sonify class will scale your data to a given pitch range and song length, and then allow you play it in the browser using the Web Audio API.
 
+The duration of a note is calculated by measuring the time between two data points. This is then scaled to the timeframe provided by `songLength`. You can optionally set `staticRythm: true` to disregard timestamps and give each data point an equal note length.
+
 ## Usage
 
 ```javascript
@@ -42,9 +44,12 @@ Sonifier.stop();
 
 {Object} **options**
 
-{number} **options.octaves** _default: 3_ - Number of octaves that the song should span
+{Array<string>} **options.pitches** _default: ["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"
+]_ - Array of pitch names to use, e.g. ["A", "C#", "E"]. Default is all 12 chromatic notes.
 
-{number} **options.baseOctave** _default: 6_ - Base octave
+{number} **options.octaves** _default: 3_ - Number of octaves that the song should span.
+
+{number} **options.baseOctave** _default: 6_ - Base octave to start from. There are 9 octaves available, so whatever you set as the base octave must be less than `9 - octaves`, or else you'll be out of range.
 
 {number} **options.glissando** _default: false_ - Glide from one pitch to another. With this option enabled you can clearly hear the shape of the data.
 

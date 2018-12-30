@@ -3,42 +3,58 @@ import { uniq, values, maxBy, minBy } from "lodash/fp";
 import { percent, _validate, _format } from "./helpers";
 import notes from "./notes";
 
-const pitches = uniq(values(notes));
-
 /**
  * @class Sonify
  * @param {Array<Array<number>>} data - Two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
  * @param {number} songLength - Length of the generated song in seconds
  * @param {Object} options
+ * @param {Array<string>} options.pitches - Array of pitch names to use, e.g. ["C", "D", "E", "F", "G", "A", "B"]
  * @param {number} options.octaves - Number of octaves that the song should span
  * @param {number} options.baseOctave - Base octave
- * @param {number} options.glissando - Whether pitches should glide seamlessly from one to another
- * @param {number} options.staticRhythm - Do not calculate rhythm based on timestamps, and instead equally divide pitches into the specified songLength
+ * @param {boolean} options.glissando - Whether pitches should glide seamlessly from one to another
+ * @param {boolean} options.staticRhythm - Do not calculate rhythm based on timestamps, and instead equally divide pitches into the specified songLength
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
   constructor(data, songLength, options) {
-    _validate(data, songLength, options);
-
     const {
-      octaves = 3,
-      baseOctave = 6,
+      pitches = [
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "Gb",
+        "G",
+        "A",
+        "Ab",
+        "Bb",
+        "B"
+      ],
+      octaves = 2,
+      baseOctave = 3,
       glissando = false,
       staticRhythm = false
     } =
       options || {};
 
-    this.maxPitch = octaves * 8 + baseOctave * 8;
-    this.minPitch = baseOctave * 8;
+    _validate(data, songLength, pitches, octaves, baseOctave);
+
+    this.pitches = Object.keys(notes)
+      .filter(note => {
+        return pitches.includes(note.replace(/\d/g, ""));
+      })
+      .map(pitchName => notes[pitchName]);
+    this.minPitch = baseOctave * pitches.length;
+    this.maxPitch = octaves * pitches.length + this.minPitch;
     this.context = {};
     this.currentTime = 0;
     this.isPlaying = false;
     this.glissando = glissando;
     this.staticRhythm = staticRhythm;
     this.songLength = songLength;
-
-    const transformedData = _transform.call(this, data);
-    this.data = transformedData;
+    this.data = _transform.call(this, data);
   }
 }
 
@@ -78,31 +94,6 @@ function _clearContext() {
     this.context.close();
     this.currentTime = 0;
   }
-}
-
-/**
- * Takes two frequencies and a note length (in beats) and
- * creates a gain and oscillator node.
- * @param {number} freq - A float representing the frequency (pitch) of a given note
- * @param {number} nextFreq - A float representing the frequency (pitch) of the next note in the song
- * @param {number} noteLength - A float representing the note length in seconds
- * @return {void}
- */
-function _createSound(freq, nextFreq, noteLength) {
-  // Schedule the current frequency
-  this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
-
-  if (this.glissando) {
-    // Schedule a gradual, exponential change in frequency from the current
-    // pitch to the next that spans the noteLength value
-    this.oscillator.frequency.exponentialRampToValueAtTime(
-      nextFreq,
-      this.currentTime + noteLength
-    );
-  }
-
-  // Move the currentTime forward
-  this.currentTime += noteLength;
 }
 
 /**
@@ -150,9 +141,43 @@ function _mapTimeToNoteLength(data) {
 
       return [...point, noteLengthSecs];
     } else {
-      return [...point, 0];
+      return [...point, this.staticRhythm ? this.songLength / data.length : 0];
     }
   });
+}
+
+/**
+ * Takes two frequencies and a note length (in beats) and
+ * creates a gain and oscillator node.
+ * @param {number} freq - A float representing the frequency (pitch) of a given note
+ * @param {number} nextFreq - A float representing the frequency (pitch) of the next note in the song
+ * @param {number} noteLength - A float representing the note length in seconds
+ * @return {void}
+ */
+function _createSound(freq, nextFreq, noteLength) {
+  // Schedule the current frequency
+  this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
+  this.gainNode.gain.setTargetAtTime(1, this.currentTime, 0.015);
+
+  if (this.glissando) {
+    // Schedule a gradual, exponential change in frequency from the current
+    // pitch to the next that spans the noteLength value
+    this.oscillator.frequency.exponentialRampToValueAtTime(
+      nextFreq,
+      this.currentTime + noteLength
+    );
+  } else {
+    // If glissando is false, then we want to add a slight space between each
+    // note so we can differentiate the data points
+    this.gainNode.gain.setTargetAtTime(
+      0,
+      this.currentTime + noteLength - noteLength / this.songLength,
+      0.015
+    );
+  }
+
+  // Move the currentTime forward
+  this.currentTime += noteLength;
 }
 
 /**
@@ -182,14 +207,13 @@ Sonify.prototype.play = function() {
   this.oscillator.start(this.currentTime);
 
   let freq, nextFreq;
-
   for (let i = 0; i < this.data.length; i++) {
     // If we're on the last data point, exit the loop
     if (i === this.data.length - 1) break;
 
     // Lookup frequencies using the pitch number
-    freq = pitches[this.data[i].pitch];
-    nextFreq = pitches[this.data[i + 1].pitch];
+    nextFreq = this.pitches[this.data[i + 1].pitch];
+    freq = this.pitches[this.data[i].pitch];
 
     // Call create sound with frequencies and note length
     _createSound.call(this, freq, nextFreq, this.data[i].noteLength);
