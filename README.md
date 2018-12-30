@@ -1,65 +1,53 @@
 # Sonify
 
+A module that allows you to sonify timeseries data. The Sonify class will scale your data to a given pitch range and song length, and then allow you play it in the browser using the Web Audio API.
+
 ## Usage
 
 ```javascript
 import Sonify from "sonify";
 
-const Sonifier = new Sonify(5, 3, 6);
+const data = [
+  [1536969666906, 1],
+  [1546969674206, 2],
+  [1556966695555, 4.3],
+  [1566959697655, 2.3],
+  [1576669693906, 3]
+];
 
-const rawData = [ 
-    { time: 1536969693906, value: 1 }, 
-    { time: 1536969694206, value: 2 }, 
-    { time: 1536969695555, value: 4.3 }, 
-    { time: 1536969697655, value: 2.3 }
-]
+// Instantiate a new Sonify instance with our data,
+// with a song length of 10 seconds. Resulting pitches
+// should span 3 octaves, starting from C06.
+const Sonifier = new Sonify(data, 10, {
+  octaves: 3,
+  baseOctave: 6
+});
 
-const pitches = Sonifier.mapNodesToPitches(rawData)
+Sonifier.play();
 
-const timedData = Sonifier.mapTimeToNoteLength(pitches);
+console.log(Sonifier.isPlaying); // true
 
-Sonifier.play(timedData)
+Sonifier.stop();
 ```
 
 ## API
 
-### Sonify
-{number} **secPerSongYear** - Number of seconds to represent each year in the source data
+### Sonify class
 
-{number} **octaves** - Number of octaves that the song should span
+{Array<Array<number>>} **data** _required_ - Two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
 
-{number} **baseOctave** - Base octave
+{number} **songLength** _required_ - Length of the generated song in seconds
 
-### Sonify.prototype.mapNodesToPitches
-Take an array of data point objects with the keys "time" and "value" and return a transformed object with a "value" property representing a pitch within the given octave range
+{Object} **options**
 
-{Array<Object>} **data** - An array of data point objects
+{number} **options.octaves** _default: 3_ - Number of octaves that the song should span
 
-{string} **data[].value** - Integer value of the data point
+{number} **options.baseOctave** _default: 6_ - Base octave
 
-{string} **data[].time** - Unix timestamp value
+### Sonify.prototype.play()
 
-returns {Array<Object>} - An array of data point objects
+returns {void}
 
-### Sonify.prototype.mapTimeToNoteLength
-
-Take an array of data point objects with the keys "time" and "value" and return a transformed object with a "noteLength" property that represents a note length in seconds
-
-{Array<Object>}  **data** - An array of data point objects
-
-{string} **data[].value** - Integer value of the data point
-
-{string} **data[].time** - Unix timestamp value
-
-returns {Array<Object>} - An array of data point objects
-
-### Sonify.prototype.play
-{Array<Object>} **data** - An array of data point objects
-
-{string} **data[].value** - Integer value of the data point representing a pitch
-
-{string} **data[].time** - Unix timestamp value
-
-{string} **data[].noteLength** - Interger value that represents a note length in beats per second
+### Sonify.prototype.stop()
 
 returns {void}

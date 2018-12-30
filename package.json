@@ -1,6 +1,6 @@
 {
   "name": "sonify",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A module to sonify data",
   "main": "build.js",
   "scripts": {
@@ -13,21 +13,25 @@
   "keywords": [
     "music",
     "data",
-    "sonification"
+    "sonification",
+    "timeseries"
   ],
   "author": "Kaitlin Moreno",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.17.5"
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-stage-3": "^6.24.1",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "prettier": "^1.10.2"
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "babel-core": "^6.26.3",
+    "babel-plugin-lodash": "^3.3.4",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-preset-stage-3": "^7.0.0-beta.3",
+    "eslint-config-prettier": "^2.10.0",
+    "eslint-plugin-prettier": "^2.7.0",
+    "prettier": "^1.15.3"
   },
   "prettier": {
     "bracketSpacing": true,
