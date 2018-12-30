@@ -20,7 +20,9 @@ const data = [
 // should span 3 octaves, starting from C06.
 const Sonifier = new Sonify(data, 10, {
   octaves: 3,
-  baseOctave: 6
+  baseOctave: 6,
+  glissando: true,
+  staticRhythm: false
 });
 
 Sonifier.play();
@@ -43,6 +45,10 @@ Sonifier.stop();
 {number} **options.octaves** _default: 3_ - Number of octaves that the song should span
 
 {number} **options.baseOctave** _default: 6_ - Base octave
+
+{number} **options.glissando** _default: false_ - Glide from one pitch to another. With this option enabled you can clearly hear the shape of the data.
+
+{number} **options.staticRhythm** _default: false_ - Disregard timestamps and give each data point an equal note length by dividing the provided songLength by the number of data points.
 
 ### Sonify.prototype.play()
 

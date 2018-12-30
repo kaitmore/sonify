@@ -12,19 +12,29 @@ const pitches = uniq(values(notes));
  * @param {Object} options
  * @param {number} options.octaves - Number of octaves that the song should span
  * @param {number} options.baseOctave - Base octave
+ * @param {number} options.glissando - Whether pitches should glide seamlessly from one to another
+ * @param {number} options.staticRhythm - Do not calculate rhythm based on timestamps, and instead equally divide pitches into the specified songLength
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
   constructor(data, songLength, options) {
     _validate(data, songLength, options);
 
-    const { octaves = 3, baseOctave = 6 } = options || {};
+    const {
+      octaves = 3,
+      baseOctave = 6,
+      glissando = false,
+      staticRhythm = false
+    } =
+      options || {};
 
     this.maxPitch = octaves * 8 + baseOctave * 8;
     this.minPitch = baseOctave * 8;
     this.context = {};
     this.currentTime = 0;
     this.isPlaying = false;
+    this.glissando = glissando;
+    this.staticRhythm = staticRhythm;
     this.songLength = songLength;
 
     const transformedData = _transform.call(this, data);
@@ -82,12 +92,14 @@ function _createSound(freq, nextFreq, noteLength) {
   // Schedule the current frequency
   this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
 
-  // Schedule a gradual, exponential change in frequency from the current
-  // pitch to the next that spans the noteLength value
-  this.oscillator.frequency.exponentialRampToValueAtTime(
-    nextFreq,
-    this.currentTime + noteLength
-  );
+  if (this.glissando) {
+    // Schedule a gradual, exponential change in frequency from the current
+    // pitch to the next that spans the noteLength value
+    this.oscillator.frequency.exponentialRampToValueAtTime(
+      nextFreq,
+      this.currentTime + noteLength
+    );
+  }
 
   // Move the currentTime forward
   this.currentTime += noteLength;
@@ -120,17 +132,22 @@ function _mapNodesToPitches(data) {
  * @return {Array<Array<number>>}  - A transformed two dimensional array, where the second index now represents note length in seconds
  */
 function _mapTimeToNoteLength(data) {
-  const startTime = data[0][0];
-  const endTime = data[data.length - 1][0];
-  const totalTime = endTime - startTime;
+  const earliestTS = data[0][0];
+  const latestTS = data[data.length - 1][0];
+  const domain = latestTS - earliestTS;
 
   return data.map((point, i) => {
     if (i !== data.length - 1) {
-      let currentPointInSong =
-        percent(point[0], startTime, totalTime) * this.songLength;
-      let nextPointInSong =
-        percent(data[i + 1][0], startTime, totalTime) * this.songLength;
-      let noteLengthSecs = nextPointInSong - currentPointInSong;
+      const currentPointInSong =
+        percent(point[0], earliestTS, domain) * this.songLength;
+      const nextPointInSong =
+        percent(data[i + 1][0], earliestTS, domain) * this.songLength;
+
+      // If the rhythm is static, just divide total seconds by the number of data points
+      const noteLengthSecs = this.staticRhythm
+        ? this.songLength / data.length
+        : nextPointInSong - currentPointInSong;
+
       return [...point, noteLengthSecs];
     } else {
       return [...point, 0];
