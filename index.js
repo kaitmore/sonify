@@ -1,8 +1,9 @@
-import _ from "lodash";
+import { uniq, values, maxBy, minBy } from "lodash/fp";
+
 import { percent, _validate, _format } from "./helpers";
 import notes from "./notes";
 
-const pitches = _.uniq(_.values(notes));
+const pitches = uniq(values(notes));
 
 /**
  * @class Sonify
@@ -100,8 +101,9 @@ function _createSound(freq, nextFreq, noteLength) {
  * @return {Array<Array<number>>}  - A transformed two dimensional array, where the first index now represents a pitch value
  */
 function _mapNodesToPitches(data) {
-  const minDataPoint = _.minBy(data, x => x[1])[1];
-  const maxDataPoint = _.maxBy(data, x => x[1])[1];
+  const minDataPoint = minBy(x => x[1], data)[1];
+  const maxDataPoint = maxBy(x => x[1], data)[1];
+  console.log(maxDataPoint);
 
   return data.map(point => {
     const factor = percent(point[1], minDataPoint, maxDataPoint - minDataPoint);
