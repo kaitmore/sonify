@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { percent, validateArgs } from "./helpers";
+import { percent, _validate } from "./helpers";
 import notes from "./notes";
 
 const pitches = _.uniq(_.values(notes));
@@ -14,10 +14,11 @@ const pitches = _.uniq(_.values(notes));
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
-  constructor(data, songLength, { octaves = 3, baseOctave = 6 }) {
-    if (baseOctave + octaves > 9) {
-      throw new Error("Base octave must be no more than 9 - octaves");
-    }
+  constructor(data, songLength, options) {
+    _validate(data, songLength, options);
+
+    const { octaves = 3, baseOctave = 6 } = options || {};
+
     this.maxPitch = octaves * 8 + baseOctave * 8;
     this.minPitch = baseOctave * 8;
     this.context = {};
@@ -35,9 +36,8 @@ function _transform(data) {
 
   const pitchedData = _mapNodesToPitches.call(this, data);
   const timedData = _mapTimeToNoteLength.call(this, pitchedData);
-  const transformedData = _format(timedData);
-  console.log(transformedData);
-  return transformedData;
+
+  return _format(timedData);
 }
 
 function _format(data) {
