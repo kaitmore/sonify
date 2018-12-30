@@ -21,9 +21,11 @@ function isValidTimestamp(_timestamp) {
 }
 
 function _validate(data, songLength, options) {
-  const isDataValid = data.every(([timestamp, value]) => {
-    return isValidTimestamp(timestamp) && isNumeric(value);
-  });
+  const isDataValid =
+    data.isArray &&
+    data.every(([timestamp, value]) => {
+      return isValidTimestamp(timestamp) && isNumeric(value);
+    });
 
   if (!isDataValid) {
     throw new Error(
@@ -38,4 +40,11 @@ function _validate(data, songLength, options) {
   }
 }
 
-export { _validate, percent };
+function _format(data) {
+  return data.map(([, pitch, noteLength]) => ({
+    pitch,
+    noteLength
+  }));
+}
+
+export { _validate, percent, _format };

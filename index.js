@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { percent, _validate } from "./helpers";
+import { percent, _validate, _format } from "./helpers";
 import notes from "./notes";
 
 const pitches = _.uniq(_.values(notes));
@@ -30,6 +30,12 @@ class Sonify {
   }
 }
 
+/**
+ * Sorts data and calls _mapNodesToPitches and _mapTimeToNoteLength to transform the
+ * data into something we can play using the web audio api.
+ * @param {Array<Array<number>>} data - Two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
+ * @return {Array<Object>} - An array of objects with the form [{ pitch: 45, noteLength: 0.47312324 }]
+ */
 function _transform(data) {
   // Sort data by timestamp
   data.sort(([a], [b]) => a - b);
@@ -38,13 +44,6 @@ function _transform(data) {
   const timedData = _mapTimeToNoteLength.call(this, pitchedData);
 
   return _format(timedData);
-}
-
-function _format(data) {
-  return data.map(([, pitch, noteLength]) => ({
-    pitch,
-    noteLength
-  }));
 }
 
 /**
@@ -72,10 +71,10 @@ function _clearContext() {
 /**
  * Takes two frequencies and a note length (in beats) and
  * creates a gain and oscillator node.
- * @param {Array<Object>} data - An array of data point objects
- * @param {string} data[].value - Integer value of the data point
- * @param {string} data[].time - Unix timestamp value
- * @return {Array<Object>} - An array of data point objects
+ * @param {number} freq - A float representing the frequency (pitch) of a given note
+ * @param {number} nextFreq - A float representing the frequency (pitch) of the next note in the song
+ * @param {number} noteLength - A float representing the note length in seconds
+ * @return {void}
  */
 function _createSound(freq, nextFreq, noteLength) {
   // Schedule the current frequency
@@ -94,13 +93,10 @@ function _createSound(freq, nextFreq, noteLength) {
 
 /**
  * mapNodesToPitches
- * Take an array of data point objects with the keys "time" and "value" and
- * return a transformed object with a "value" property representing a pitch within
- * the given octave range
- * @param {Array<Object>} data - An array of data point objects
- * @param {string} data[].value - Integer value of the data point
- * @param {string} data[].time - Unix timestamp value
- * @return {Array<Object>} - An array of data point objects
+ * Take an array of data point objects and return a transformed object
+ * with the 2nd index representing a pitch within the given octave range
+ * @param {Array<Array<number>>} data - A sorted two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
+ * @return {Array<Array<number>>}  - A transformed two dimensional array, where the first index now represents a pitch value
  */
 function _mapNodesToPitches(data) {
   const minDataPoint = _.minBy(data, x => x[1])[1];
@@ -116,13 +112,10 @@ function _mapNodesToPitches(data) {
 }
 
 /**
- * Take an array of data point objects with the keys "time" and "value" and
- * return a transformed object with a "noteLength" property that represents
- * a note length in seconds
- * @param {Array<Object>} data - An array of data point objects
- * @param {string} data[].value - Integer value of the data point
- * @param {string} data[].time - Unix timestamp value
- * @return {Array<Object>} - An array of data point objects
+ * Takes a two-dimensional array of data points and returns a transformed array
+ * where the 2nd index represents a given note length in seconds
+ * @param {Array<Array<number>>} data - A sorted two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
+ * @return {Array<Array<number>>}  - A transformed two dimensional array, where the second index now represents note length in seconds
  */
 function _mapTimeToNoteLength(data) {
   const startTime = data[0][0];
@@ -131,12 +124,10 @@ function _mapTimeToNoteLength(data) {
 
   return data.map((point, i) => {
     if (i !== data.length - 1) {
-      let currentTimestamp = point[0];
-      let nextTimestamp = data[i + 1][0];
       let currentPointInSong =
-        percent(currentTimestamp, startTime, totalTime) * this.songLength;
+        percent(point[0], startTime, totalTime) * this.songLength;
       let nextPointInSong =
-        percent(nextTimestamp, startTime, totalTime) * this.songLength;
+        percent(data[i + 1][0], startTime, totalTime) * this.songLength;
       let noteLengthSecs = nextPointInSong - currentPointInSong;
       return [...point, noteLengthSecs];
     } else {
@@ -187,7 +178,7 @@ Sonify.prototype.play = function() {
 };
 
 /**
- * Calls internal _clearContext
+ * Clears the audio context
  * @returns {void}
  */
 Sonify.prototype.stop = function() {
