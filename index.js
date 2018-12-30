@@ -23,6 +23,7 @@ class Sonify {
     this.minPitch = baseOctave * 8;
     this.context = {};
     this.currentTime = 0;
+    this.isPlaying = false;
     this.songLength = songLength;
 
     const transformedData = _transform.call(this, data);
@@ -146,6 +147,8 @@ Sonify.prototype.play = function() {
     _clearContext.call(this);
   }
 
+  this.isPlaying = true;
+
   // Create the audio context
   _setContext.call(this);
 
@@ -175,6 +178,7 @@ Sonify.prototype.play = function() {
   }
 
   this.oscillator.stop(this.currentTime);
+  this.isPlaying = false;
 };
 
 /**
@@ -183,6 +187,7 @@ Sonify.prototype.play = function() {
  */
 Sonify.prototype.stop = function() {
   _clearContext.call(this);
+  this.isPlaying = false;
 };
 
 export default Sonify;
