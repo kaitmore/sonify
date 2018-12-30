@@ -82,9 +82,9 @@ function _createSound(freq, nextFreq, noteLength) {
   // Schedule the current frequency
   this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
 
-  // Schedule a gradual, linear change in frequency from the current
+  // Schedule a gradual, exponential change in frequency from the current
   // pitch to the next that spans the noteLength value
-  this.oscillator.frequency.linearRampToValueAtTime(
+  this.oscillator.frequency.exponentialRampToValueAtTime(
     nextFreq,
     this.currentTime + noteLength
   );
