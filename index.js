@@ -103,7 +103,6 @@ function _createSound(freq, nextFreq, noteLength) {
 function _mapNodesToPitches(data) {
   const minDataPoint = minBy(x => x[1], data)[1];
   const maxDataPoint = maxBy(x => x[1], data)[1];
-  console.log(maxDataPoint);
 
   return data.map(point => {
     const factor = percent(point[1], minDataPoint, maxDataPoint - minDataPoint);
