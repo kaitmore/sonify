@@ -22,9 +22,13 @@ function isValidTimestamp(_timestamp) {
 
 function _validate(data, songLength, options) {
   const isDataValid =
-    data.isArray &&
-    data.every(([timestamp, value]) => {
-      return isValidTimestamp(timestamp) && isNumeric(value);
+    Array.isArray(data) &&
+    data.every(point => {
+      return (
+        Array.isArray(point) &&
+        isValidTimestamp(point[0]) &&
+        isNumeric(point[1])
+      );
     });
 
   if (!isDataValid) {
