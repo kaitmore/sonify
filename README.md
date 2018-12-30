@@ -1,6 +1,6 @@
 # Sonify
 
-A module that allows you to sonify timeseries data. The sonify class will scale your data to a given pitch range and song length, and then allow you play it in the browser using the Web Audio API.
+A module that allows you to sonify timeseries data. The Sonify class will scale your data to a given pitch range and song length, and then allow you play it in the browser using the Web Audio API.
 
 ## Usage
 
@@ -17,7 +17,7 @@ const data = [
 
 // Instantiate a new Sonify instance with our data,
 // with a song length of 10 seconds. Resulting pitches
-// should span 3 octaves, starting from the 6th octave
+// should span 3 octaves, starting from C06.
 const Sonifier = new Sonify(data, 10, {
   octaves: 3,
   baseOctave: 6
