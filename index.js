@@ -36,8 +36,7 @@ class Sonify {
       baseOctave = 3,
       glissando = false,
       staticRhythm = false
-    } =
-      options || {};
+    } = options || {};
 
     _validate(data, songLength, pitches, octaves, baseOctave);
 
@@ -126,22 +125,31 @@ function _mapTimeToNoteLength(data) {
   const earliestTS = data[0][0];
   const latestTS = data[data.length - 1][0];
   const domain = latestTS - earliestTS;
+  const avgNoteLength = this.songLength / data.length;
 
+  let noteLength;
   return data.map((point, i) => {
     if (i !== data.length - 1) {
-      const currentPointInSong =
-        percent(point[0], earliestTS, domain) * this.songLength;
-      const nextPointInSong =
-        percent(data[i + 1][0], earliestTS, domain) * this.songLength;
+      if (this.staticRhythm) {
+        // If the rhythm is static, use avgNoteLength for every note
+        return [...point, avgNoteLength];
+      } else {
+        // If not, calculate the note length in seconds by taking the difference
+        // between the current position in the song and the next position
+        const currentPointInSong =
+          percent(point[0], earliestTS, domain) * this.songLength;
+        const nextPointInSong =
+          percent(data[i + 1][0], earliestTS, domain) * this.songLength;
 
-      // If the rhythm is static, just divide total seconds by the number of data points
-      const noteLengthSecs = this.staticRhythm
-        ? this.songLength / data.length
-        : nextPointInSong - currentPointInSong;
+        noteLength = nextPointInSong - currentPointInSong;
 
-      return [...point, noteLengthSecs];
+        return [...point, noteLength];
+      }
     } else {
-      return [...point, this.staticRhythm ? this.songLength / data.length : 0];
+      // If we are on the last point, just give it a made up note length. This is used as "padding"
+      // so we can turn down the gain at the end of the song to remove the "click" sound.
+      noteLength = this.staticRhythm ? avgNoteLength * 2 : avgNoteLength;
+      return [...point, noteLength];
     }
   });
 }
@@ -155,19 +163,19 @@ function _mapTimeToNoteLength(data) {
  * @return {void}
  */
 function _createSound(freq, nextFreq, noteLength) {
-  // Schedule the current frequency
+  // Schedule the current frequency and gain
   this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
   this.gainNode.gain.setTargetAtTime(1, this.currentTime, 0.015);
 
   if (this.glissando) {
-    // Schedule a gradual, exponential change in frequency from the current
+    // Schedule an exponential change in frequency from the current
     // pitch to the next that spans the noteLength value
     this.oscillator.frequency.exponentialRampToValueAtTime(
       nextFreq,
       this.currentTime + noteLength
     );
   } else {
-    // If glissando is false, then we want to add a slight space between each
+    // If glissando is false, instead we want to add a slight space between each
     // note so we can differentiate the data points
     this.gainNode.gain.setTargetAtTime(
       0,
@@ -208,11 +216,16 @@ Sonify.prototype.play = function() {
 
   let freq, nextFreq;
   for (let i = 0; i < this.data.length; i++) {
-    // If we're on the last data point, exit the loop
-    if (i === this.data.length - 1) break;
+    // If we're not on the last data point, set nextFreq. But if we are on the last iteration
+    // and glissando is true and we are dynamically calculating rhythm, then simply break out,
+    // because nextFreq has already been scheduled on the 2nd to last loop.
+    if (i !== this.data.length - 1) {
+      nextFreq = this.pitches[this.data[i + 1].pitch];
+    } else if (this.glissando && !this.staticRhythm) {
+      break;
+    }
 
     // Lookup frequencies using the pitch number
-    nextFreq = this.pitches[this.data[i + 1].pitch];
     freq = this.pitches[this.data[i].pitch];
 
     // Call create sound with frequencies and note length
@@ -221,6 +234,13 @@ Sonify.prototype.play = function() {
 
   this.oscillator.stop(this.currentTime);
   this.isPlaying = false;
+
+  // Remove the "click" by setting the gain to 0 before the end of the last note
+  this.gainNode.gain.setTargetAtTime(
+    0,
+    this.currentTime - this.songLength / this.data.length,
+    0.015
+  );
 };
 
 /**

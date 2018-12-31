@@ -5,10 +5,20 @@
   "main": "build.js",
   "scripts": {
     "test": "npm test",
-    "build": "babel index.js -o build.js"
+    "build": "babel index.js -o build.js",
+    "build:watch": "npm run build -- -w"
   },
-  "files": ["build.js", "helpers.js", "notes.js"],
-  "keywords": ["music", "data", "sonification", "timeseries"],
+  "files": [
+    "build.js",
+    "helpers.js",
+    "notes.js"
+  ],
+  "keywords": [
+    "music",
+    "data",
+    "sonification",
+    "timeseries"
+  ],
   "author": "Kaitlin Moreno",
   "license": "ISC",
   "dependencies": {
