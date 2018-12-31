@@ -1,6 +1,7 @@
 import React from "react";
 import { withSiteData } from "react-static";
-import {} from "victory";
+
+import Editor from "../components/Editor";
 
 const data = [
   [1536969666906, 1],
@@ -24,7 +25,8 @@ const data = [
 ];
 
 export default withSiteData(() => (
-  <div style={{ textAlign: "center" }}>
-    <h1>Welcome to React-Static</h1>
+  <div style={{ textAlign: "center", height: "100%", display: "flex" }}>
+    <h1>sonify demo</h1>
+    <Editor />
   </div>
 ));

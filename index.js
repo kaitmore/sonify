@@ -13,6 +13,7 @@ import notes from "./notes";
  * @param {number} options.baseOctave - Base octave
  * @param {boolean} options.glissando - Whether pitches should glide seamlessly from one to another
  * @param {boolean} options.staticRhythm - Do not calculate rhythm based on timestamps, and instead equally divide pitches into the specified songLength
+ * @param {function} options.onEnded - Callback that is invoked when the song is finished playing
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
@@ -35,7 +36,8 @@ class Sonify {
       octaves = 2,
       baseOctave = 3,
       glissando = false,
-      staticRhythm = false
+      staticRhythm = false,
+      onEnded = () => {}
     } = options || {};
 
     _validate(data, songLength, pitches, octaves, baseOctave);
@@ -49,11 +51,13 @@ class Sonify {
     this.maxPitch = octaves * pitches.length + this.minPitch;
     this.context = {};
     this.currentTime = 0;
+    this.oscillator = {};
     this.isPlaying = false;
     this.glissando = glissando;
     this.staticRhythm = staticRhythm;
     this.songLength = songLength;
     this.data = _transform.call(this, data);
+    this.onEnded = onEnded;
   }
 }
 
@@ -197,9 +201,7 @@ Sonify.prototype.play = function() {
   if (this.context.state === "running") {
     _clearContext.call(this);
   }
-
   this.isPlaying = true;
-
   // Create the audio context
   _setContext.call(this);
 
@@ -233,7 +235,6 @@ Sonify.prototype.play = function() {
   }
 
   this.oscillator.stop(this.currentTime);
-  this.isPlaying = false;
 
   // Remove the "click" by setting the gain to 0 before the end of the last note
   this.gainNode.gain.setTargetAtTime(
@@ -241,6 +242,10 @@ Sonify.prototype.play = function() {
     this.currentTime - this.songLength / this.data.length,
     0.015
   );
+  this.oscillator.onended = e => {
+    this.isPlaying = false;
+    this.onEnded(e);
+  };
 };
 
 /**

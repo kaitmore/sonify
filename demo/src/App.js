@@ -1,17 +1,17 @@
-import React from 'react'
-import { Root, Routes } from 'react-static'
-import { Link } from '@reach/router'
+import React from "react";
+import { Root, Routes } from "react-static";
 
-import './app.css'
+import GithubCorner from "components/GithubCorner";
+
+import "./app.css";
 
 function App() {
   return (
     <Root>
-      <div className="content">
-        <Routes />
-      </div>
+      <GithubCorner />
+      <Routes />
     </Root>
-  )
+  );
 }
 
-export default App
+export default App;

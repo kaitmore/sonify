@@ -24,7 +24,8 @@ const Sonifier = new Sonify(data, 10, {
   octaves: 3,
   baseOctave: 6,
   glissando: true,
-  staticRhythm: false
+  staticRhythm: false,
+  onEnded: () => console.log("that's all folks!")
 });
 
 Sonifier.play();
@@ -44,8 +45,7 @@ Sonifier.stop();
 
 {Object} **options**
 
-{Array<string>} **options.pitches** _default: ["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"
-]_ - Array of pitch names to use, e.g. ["A", "C#", "E"]. Default is all 12 chromatic notes.
+{Array<string>} **options.pitches** _default: ["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"]_ - Array of pitch names to use, e.g. ["A", "C#", "E"]. Default is all 12 chromatic notes.
 
 {number} **options.octaves** _default: 3_ - Number of octaves that the song should span.
 
@@ -54,6 +54,8 @@ Sonifier.stop();
 {number} **options.glissando** _default: false_ - Glide from one pitch to another. With this option enabled you can clearly hear the shape of the data.
 
 {number} **options.staticRhythm** _default: false_ - Disregard timestamps and give each data point an equal note length by dividing the provided songLength by the number of data points.
+
+{function} **options.onEnded** - Callback that is invoked when the song is finished playing
 
 ### Sonify.prototype.play()
 
