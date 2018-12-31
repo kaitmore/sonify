@@ -1,7 +1,7 @@
 import React from "react";
 
 const Player = ({ onPlay, onStop, isPlaying }) => {
-  console.log(isPlaying);
+  console.log(isPlaying, onStop);
   return (
     <>
       <button type="button" onClick={() => (isPlaying ? onStop() : onPlay())}>

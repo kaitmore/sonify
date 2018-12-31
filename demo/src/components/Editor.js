@@ -4,11 +4,20 @@ import Sonify from "sonify";
 import VictoryChart from "./VictoryChart";
 import Player from "./Player";
 
-const scope = { Sonify, VictoryChart, Player };
+const scope = { React, Sonify, VictoryChart, Player };
 
 const code = `
-function Example (){
-   const data = [
+class Example extends React.Component {
+  constructor(...args) {
+    super(...args);
+    this.state = {
+        isPlaying: false
+    }
+
+  }
+
+  render() {
+    const data = [
       [1536969666906, 1],
       [1546969674206, 2],
       [1596966695555, 4.3],
@@ -30,24 +39,29 @@ function Example (){
     ];
 
     const Sonifier = new Sonify(data, 10, {
-      pitches: ["A", "C#", "E", "G#", "B"],
-      octaves: 2,
-      baseOctave: 4,
-      glissando: true,
-      staticRhythm: false
+        pitches: ["A", "C#", "E", "G#", "B"],
+        octaves: 2,
+        baseOctave: 4,
+        glissando: true,
+        staticRhythm: false,
+        onEnded: () => this.setState({ isPlaying: false })
     });
-console.log(Sonifier.context)
-    return (
-        <>
-            <Player 
-                onPlay={() => Sonifier.play()}
-                onStop={() => Sonifier.stop()} 
-                isPlaying={Sonifier.context.state === "running"} 
+
+    return <>
+            <Player
+                onPlay={() => {
+                    Sonifier.play();
+                    this.setState({ isPlaying: true })
+                    }
+                }
+                onStop={() =>  { Sonifier.stop();
+                    this.setState({ isPlaying: false })
+                    }}
+                isPlaying={this.state.isPlaying}
             />
             <VictoryChart data={data} />
-        </>
-    )
-
+       </>
+  }
 }
 `;
 

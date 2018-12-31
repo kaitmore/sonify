@@ -45,6 +45,8 @@ button:hover {
 pre {
   flex: 1;
   max-width: 650px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 .react-live-preview {
   width: 100%;
