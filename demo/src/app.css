@@ -1,0 +1,82 @@
+body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue",
+    Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+div {
+  height: 100%;
+}
+h1 {
+  margin: auto;
+  width: 100%;
+  padding: 12px;
+  position: absolute;
+}
+a {
+  text-decoration: none;
+  color: #108db8;
+  font-weight: bold;
+}
+button {
+  padding: 12px;
+  color: #1d1e20;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 2px solid #c33930;
+  background-color: white;
+  font-size: 16px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  margin: 12px auto;
+  z-index: 2;
+}
+button:hover {
+  border-width: 3px;
+}
+.react-live {
+  display: flex;
+  width: 100%;
+}
+pre {
+  flex: 1;
+  max-width: 650px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.react-live-preview {
+  width: 100%;
+  flex: 2;
+}
+.github-corner {
+  user-select: all;
+}
+.github-corner:hover .octo-arm {
+  animation: octocat-wave 560ms ease-in-out;
+}
+@keyframes octocat-wave {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20%,
+  60% {
+    transform: rotate(-25deg);
+  }
+  40%,
+  80% {
+    transform: rotate(10deg);
+  }
+}
+@media (max-width: 500px) {
+  .github-corner:hover .octo-arm {
+    animation: none;
+  }
+  .github-corner .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+  }
+}
