@@ -49,10 +49,7 @@ class Sonify {
       .map(pitchName => notes[pitchName]);
     this.minPitch = baseOctave * pitches.length;
     this.maxPitch = octaves * pitches.length + this.minPitch;
-    this.context = {};
     this.currentTime = 0;
-    this.oscillator = {};
-    this.isPlaying = false;
     this.glissando = glissando;
     this.staticRhythm = staticRhythm;
     this.songLength = songLength;
@@ -83,8 +80,8 @@ function _transform(data) {
  * @return {void}
  */
 function _setContext() {
-  this.context = new (window.AudioContext || window.webkitAudioContext)();
-  this.currentTime = this.context.currentTime;
+  Sonify.context = new (window.AudioContext || window.webkitAudioContext)();
+  Sonify.currentTime = Sonify.context.currentTime;
 }
 
 /**
@@ -93,9 +90,9 @@ function _setContext() {
  * @return {void}
  */
 function _clearContext() {
-  if (this.context && this.context.state === "running") {
-    this.context.close();
-    this.currentTime = 0;
+  if (Sonify.context && Sonify.context.state === "running") {
+    Sonify.context.close();
+    Sonify.currentTime = 0;
   }
 }
 
@@ -198,7 +195,7 @@ function _createSound(freq, nextFreq, noteLength) {
  * @returns {void}
  */
 Sonify.prototype.play = function() {
-  if (this.context.state === "running") {
+  if (Sonify.context && Sonify.context.state === "running") {
     _clearContext.call(this);
   }
   this.isPlaying = true;
@@ -206,12 +203,12 @@ Sonify.prototype.play = function() {
   _setContext.call(this);
 
   // Create gain and oscillator nodes
-  this.gainNode = this.context.createGain();
-  this.oscillator = this.context.createOscillator();
+  this.gainNode = Sonify.context.createGain();
+  this.oscillator = Sonify.context.createOscillator();
 
   // Connect the oscillator and gain to the context destination
   this.oscillator.connect(this.gainNode);
-  this.gainNode.connect(this.context.destination);
+  this.gainNode.connect(Sonify.context.destination);
 
   // Start the oscillator node
   this.oscillator.start(this.currentTime);
@@ -255,6 +252,7 @@ Sonify.prototype.play = function() {
 Sonify.prototype.stop = function() {
   _clearContext.call(this);
   this.isPlaying = false;
+  this.onEnded();
 };
 
 export default Sonify;
