@@ -1,4 +1,4 @@
-import { uniq, values, maxBy, minBy } from "lodash/fp";
+import _ from "lodash";
 
 import { percent, _validate, _format } from "./helpers";
 import notes from "./notes";
@@ -104,8 +104,8 @@ function _clearContext() {
  * @return {Array<Array<number>>}  - A transformed two dimensional array, where the first index now represents a pitch value
  */
 function _mapNodesToPitches(data) {
-  const minDataPoint = minBy(x => x[1], data)[1];
-  const maxDataPoint = maxBy(x => x[1], data)[1];
+  const minDataPoint = _.minBy(data, x => x[1])[1];
+  const maxDataPoint = _.maxBy(data, x => x[1])[1];
 
   return data.map(point => {
     const factor = percent(point[1], minDataPoint, maxDataPoint - minDataPoint);

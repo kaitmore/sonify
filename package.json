@@ -5,13 +5,10 @@
   "main": "build.js",
   "scripts": {
     "test": "npm test",
-    "build": "babel src -o build.js",
-    "build:watch": "npm run build src -- -w",
+    "build": "rollup --config",
+    "build:watch": "npm run build -- -w",
     "publish:demo": "gh-pages --dist ./demo/dist"
   },
-  "files": [
-    "src/**"
-  ],
   "keywords": [
     "music",
     "data",
@@ -35,7 +32,11 @@
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-prettier": "^3.1.0",
     "gh-pages": "^2.0.1",
-    "prettier": "^1.15.3"
+    "prettier": "^1.15.3",
+    "rollup": "^1.14.4",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-node-resolve": "^5.0.1"
   },
   "prettier": {
     "bracketSpacing": true,

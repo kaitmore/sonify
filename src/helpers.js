@@ -1,6 +1,3 @@
-import notes from "./notes";
-import { uniq, values } from "lodash/fp";
-
 const VALID_OCTAVES = 8;
 
 function percent(point, startTime, totalTime) {

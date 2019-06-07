@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   C0: 16.35,
   "C#0": 17.32,
   Db0: 17.32,
