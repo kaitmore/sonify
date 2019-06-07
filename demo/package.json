@@ -17,7 +17,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-live": "^2.1.2",
-    "sonify": "file:sonify-0.2.3.tgz",
+    "sonify": "^0.2.4",
     "victory": "^32.2.3"
   }
 }
