@@ -6,7 +6,8 @@
   "scripts": {
     "test": "npm test",
     "build": "babel index.js -o build.js",
-    "build:watch": "npm run build -- -w"
+    "build:watch": "npm run build -- -w",
+    "publish:demo": "gh-pages --dist ./demo/dist/*"
   },
   "files": [
     "build.js",
