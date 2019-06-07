@@ -6780,9 +6780,10 @@ sockjs@0.3.19:
     faye-websocket "^0.10.0"
     uuid "^3.0.1"
 
-sonify@0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/sonify/-/sonify-0.2.2.tgz#25c1f7042ad83c7549c3f1c658b052d89bb45a4a"
+sonify@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/sonify/-/sonify-0.2.3.tgz#a6e03ec9d111aa7a599d8c744635787ac11abf07"
+  integrity sha512-J3uJrF7ouBTo1f1iaOtArtoNYJaNsvjh2RsFsPBYtzC9tb0gN2gpueJQEcpBmFU5+bvuqk1zrWADaI0FM0VWsw==
   dependencies:
     lodash "^4.17.11"
 
