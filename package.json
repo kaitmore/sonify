@@ -1,13 +1,13 @@
 {
   "name": "sonify",
-  "version": "0.2.4",
+  "version": "0.2.4-testytest",
   "description": "A module to sonify data",
   "main": "build.js",
   "scripts": {
     "test": "npm test",
     "build": "rollup --config",
     "build:watch": "npm run build -- -w",
-    "publish:demo": "gh-pages --dist ./demo/dist"
+    "publish:demo": "gh-pages --dist ./demo/out"
   },
   "keywords": [
     "music",
