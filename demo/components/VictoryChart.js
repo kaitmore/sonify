@@ -17,10 +17,7 @@ const VictoryChartRenderer = ({ data }) => (
       }}
     />
     <VictoryAxis
-      tickFormat={x => {
-        console.log(new Date(x));
-        return moment(new Date(x)).format("L");
-      }}
+      tickFormat={x => moment(new Date(x)).format("L")}
       style={{
         axis: { stroke: "#000" },
         tickLabels: {

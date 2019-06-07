@@ -256,7 +256,6 @@ var Player = function Player(_ref) {
   var onPlay = _ref.onPlay,
       onStop = _ref.onStop,
       isPlaying = _ref.isPlaying;
-  console.log(isPlaying, onStop);
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     type: "button",
     onClick: function onClick() {
@@ -264,7 +263,7 @@ var Player = function Player(_ref) {
     },
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 7
+      lineNumber: 6
     },
     __self: this
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
@@ -272,7 +271,7 @@ var Player = function Player(_ref) {
     "aria-label": "play",
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 8
+      lineNumber: 7
     },
     __self: this
   }, "\u25B6\uFE0F"), isPlaying ? "Stop" : "Listen"));
@@ -338,7 +337,6 @@ var VictoryChartRenderer = function VictoryChartRenderer(_ref) {
     __self: this
   }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(victory__WEBPACK_IMPORTED_MODULE_2__["VictoryAxis"], {
     tickFormat: function tickFormat(x) {
-      console.log(new Date(x));
       return moment__WEBPACK_IMPORTED_MODULE_3___default()(new Date(x)).format("L");
     },
     style: {
@@ -379,7 +377,7 @@ var VictoryChartRenderer = function VictoryChartRenderer(_ref) {
     }),
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 35
+      lineNumber: 32
     },
     __self: this
   }));
