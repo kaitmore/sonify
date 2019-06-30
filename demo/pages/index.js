@@ -3,6 +3,7 @@ import React from "react";
 import GithubCorner from "../components/GithubCorner";
 
 import Editor from "../components/Editor";
+import "../style/style.css";
 
 const data = [
   [1536969666906, 1],
@@ -26,9 +27,14 @@ const data = [
 ];
 
 export default () => (
-  <div style={{ textAlign: "center", height: "100%", display: "flex" }}>
+  <div
+    style={{
+      textAlign: "center",
+      height: "100%",
+      display: "flex"
+    }}
+  >
     <GithubCorner />
-    <h1>sonify demo</h1>
     <Editor />
   </div>
 );

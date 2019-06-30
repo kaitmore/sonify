@@ -128,27 +128,125 @@ var Editor = function Editor() {
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_live__WEBPACK_IMPORTED_MODULE_1__["LiveProvider"], {
     code: code,
     scope: scope,
+    id: "editor",
+    theme: {
+      plain: {
+        color: "#d6deeb",
+        backgroundColor: "#011627"
+      },
+      styles: [{
+        types: ["changed"],
+        style: {
+          color: "rgb(162, 191, 252)",
+          fontStyle: "italic"
+        }
+      }, {
+        types: ["deleted"],
+        style: {
+          color: "rgba(239, 83, 80, 0.56)",
+          fontStyle: "italic"
+        }
+      }, {
+        types: ["inserted", "attr-name"],
+        style: {
+          color: "rgb(173, 219, 103)",
+          fontStyle: "italic"
+        }
+      }, {
+        types: ["comment"],
+        style: {
+          color: "rgb(99, 119, 119)",
+          fontStyle: "italic"
+        }
+      }, {
+        types: ["string", "url"],
+        style: {
+          color: "rgb(173, 219, 103)"
+        }
+      }, {
+        types: ["variable"],
+        style: {
+          color: "rgb(214, 222, 235)"
+        }
+      }, {
+        types: ["number"],
+        style: {
+          color: "rgb(247, 140, 108)"
+        }
+      }, {
+        types: ["builtin", "char", "constant", "function"],
+        style: {
+          color: "rgb(130, 170, 255)"
+        }
+      }, {
+        // This was manually added after the auto-generation
+        // so that punctuations are not italicised
+        types: ["punctuation"],
+        style: {
+          color: "rgb(199, 146, 234)"
+        }
+      }, {
+        types: ["selector", "doctype"],
+        style: {
+          color: "rgb(199, 146, 234)",
+          fontStyle: "italic"
+        }
+      }, {
+        types: ["class-name"],
+        style: {
+          color: "rgb(255, 203, 139)"
+        }
+      }, {
+        types: ["tag", "operator", "keyword"],
+        style: {
+          color: "rgb(127, 219, 202)"
+        }
+      }, {
+        types: ["boolean"],
+        style: {
+          color: "rgb(255, 88, 116)"
+        }
+      }, {
+        types: ["property"],
+        style: {
+          color: "rgb(128, 203, 196)"
+        }
+      }, {
+        types: ["namespace"],
+        style: {
+          color: "rgb(178, 204, 214)"
+        }
+      }]
+    },
     __source: {
       fileName: _jsxFileName,
       lineNumber: 69
     },
     __self: this
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_live__WEBPACK_IMPORTED_MODULE_1__["LiveEditor"], {
+    style: {
+      minWidth: "500px",
+      outline: "none"
+    },
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 70
+      lineNumber: 179
     },
     __self: this
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_live__WEBPACK_IMPORTED_MODULE_1__["LiveError"], {
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 71
+      lineNumber: 180
     },
     __self: this
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_live__WEBPACK_IMPORTED_MODULE_1__["LivePreview"], {
+    style: {
+      width: "100%",
+      height: "100%"
+    },
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 72
+      lineNumber: 181
     },
     __self: this
   }));
@@ -189,8 +287,8 @@ var GithubCorner = function GithubCorner() {
     height: "80",
     viewBox: "0 0 250 250",
     style: {
-      fill: "#151513",
-      color: "#fff",
+      fill: "#fff",
+      color: "#151513",
       position: "absolute",
       top: 0,
       border: 0,
@@ -256,25 +354,33 @@ var Player = function Player(_ref) {
   var onPlay = _ref.onPlay,
       onStop = _ref.onStop,
       isPlaying = _ref.isPlaying;
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center"
+    },
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 5
+    },
+    __self: this
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", {
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 11
+    },
+    __self: this
+  }, "sonify demo"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     type: "button",
     onClick: function onClick() {
       return isPlaying ? onStop() : onPlay();
     },
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 6
+      lineNumber: 12
     },
     __self: this
-  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-    role: "img",
-    "aria-label": "play",
-    __source: {
-      fileName: _jsxFileName,
-      lineNumber: 7
-    },
-    __self: this
-  }, "\u25B6\uFE0F"), isPlaying ? "Stop" : "Listen"));
+  }, isPlaying ? "Stop" : "Listen"));
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (Player);
@@ -321,13 +427,14 @@ var VictoryChartRenderer = function VictoryChartRenderer(_ref) {
     dependentAxis: true,
     style: {
       axis: {
-        stroke: "#000"
+        stroke: "rgb(214, 222, 235)"
       },
       tickLabels: {
         fontFamily: "arial",
-        fontSize: "10px",
+        fontSize: "8px",
         padding: 5,
-        textAnchor: "end"
+        textAnchor: "end",
+        fill: "rgb(214, 222, 235)"
       }
     },
     __source: {
@@ -341,19 +448,20 @@ var VictoryChartRenderer = function VictoryChartRenderer(_ref) {
     },
     style: {
       axis: {
-        stroke: "#000"
+        stroke: "rgb(214, 222, 235)"
       },
       tickLabels: {
         fontFamily: "arial",
         fontSize: "8px",
         angle: 35,
         padding: 3,
-        textAnchor: "start"
+        textAnchor: "start",
+        fill: "rgb(214, 222, 235)"
       }
     },
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 19
+      lineNumber: 20
     },
     __self: this
   }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(victory__WEBPACK_IMPORTED_MODULE_2__["VictoryLine"], {
@@ -377,7 +485,7 @@ var VictoryChartRenderer = function VictoryChartRenderer(_ref) {
     }),
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 32
+      lineNumber: 34
     },
     __self: this
   }));
@@ -520,7 +628,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _components_GithubCorner__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/GithubCorner */ "./components/GithubCorner.js");
 /* harmony import */ var _components_Editor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/Editor */ "./components/Editor.js");
+/* harmony import */ var _style_style_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../style/style.css */ "./style/style.css");
+/* harmony import */ var _style_style_css__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_style_style_css__WEBPACK_IMPORTED_MODULE_3__);
 var _jsxFileName = "/Users/kaitmore/Projects/sonify/demo/pages/index.js";
+
 
 
 
@@ -534,29 +645,34 @@ var data = [[1536969666906, 1], [1546969674206, 2], [1596966695555, 4.3], [16669
     },
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 29
+      lineNumber: 30
     },
     __self: this
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_GithubCorner__WEBPACK_IMPORTED_MODULE_1__["default"], {
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 30
+      lineNumber: 37
     },
     __self: this
-  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", {
+  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_Editor__WEBPACK_IMPORTED_MODULE_2__["default"], {
     __source: {
       fileName: _jsxFileName,
-      lineNumber: 31
-    },
-    __self: this
-  }, "sonify demo"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components_Editor__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    __source: {
-      fileName: _jsxFileName,
-      lineNumber: 32
+      lineNumber: 38
     },
     __self: this
   }));
 });
+
+/***/ }),
+
+/***/ "./style/style.css":
+/*!*************************!*\
+  !*** ./style/style.css ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
 
 /***/ }),
 

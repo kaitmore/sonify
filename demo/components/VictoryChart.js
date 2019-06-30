@@ -7,25 +7,27 @@ const VictoryChartRenderer = ({ data }) => (
     <VictoryAxis
       dependentAxis
       style={{
-        axis: { stroke: "#000" },
+        axis: { stroke: "rgb(214, 222, 235)" },
         tickLabels: {
           fontFamily: "arial",
-          fontSize: "10px",
+          fontSize: "8px",
           padding: 5,
-          textAnchor: "end"
+          textAnchor: "end",
+          fill: "rgb(214, 222, 235)"
         }
       }}
     />
     <VictoryAxis
       tickFormat={x => moment(new Date(x)).format("L")}
       style={{
-        axis: { stroke: "#000" },
+        axis: { stroke: "rgb(214, 222, 235)" },
         tickLabels: {
           fontFamily: "arial",
           fontSize: "8px",
           angle: 35,
           padding: 3,
-          textAnchor: "start"
+          textAnchor: "start",
+          fill: "rgb(214, 222, 235)"
         }
       }}
     />
