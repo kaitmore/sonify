@@ -7,7 +7,7 @@
     "test": "npm test",
     "build": "rollup --config",
     "build:watch": "npm run build -- -w",
-    "publish:demo": "gh-pages --dist ./demo/out"
+    "publish:demo": "npx gh-pages --dist ./demo/out"
   },
   "keywords": [
     "music",
