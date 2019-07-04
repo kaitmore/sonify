@@ -1,3 +1,5 @@
 .git
 node_modules
 build.js
+demo/out/**/*
+demo/.next/**/*
