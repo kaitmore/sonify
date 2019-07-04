@@ -41,8 +41,6 @@ Sonifier.stop();
 
 ### Sonify constructor options
 
--------------------------------------------------------------------------------------------------------------------------------------- 
-
 | Name         | Type                 | Sample Value                                   | Description                                                                                                                            | Default                                                             | Required |
 | ------------ | -------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------- |
 | data         | Array<Array<number>> | `[[1586969694206, 2.3], [1596969695555, 5.3]]` | Two dimensional array of data points                                                                                                   |                                                                     | yes      |
@@ -56,8 +54,6 @@ Sonifier.stop();
 
 ## Methods
 
---------------------------------------------------------------------------------------------------------------------------------------
-
 ### Sonify.prototype.play()
 
 Initiates playback of the provided data
@@ -65,3 +61,7 @@ Initiates playback of the provided data
 ### Sonify.prototype.stop()
 
 Stops playback and clears the web audio context
+
+## Developers
+
+- Kaitlin Moreno ([@kaitlinjane](https://twitter.com/kaitlinjane)) - <https://kaitlinmoreno.com>
