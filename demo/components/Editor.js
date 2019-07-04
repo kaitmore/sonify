@@ -38,7 +38,9 @@ class Example extends React.Component {
       [1798869694236, 0.05]
     ];
 
-    const Sonifier = new Sonify(data, 10, {
+    const Sonifier = new Sonify({
+        data, 
+        songLength: 10,
         pitches: ["A", "C#", "E", "G#", "B"],
         octaves: 2,
         baseOctave: 4,

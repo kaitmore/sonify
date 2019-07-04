@@ -20,7 +20,9 @@ const data = [
 // Instantiate a new Sonify instance with our data,
 // with a song length of 10 seconds. Resulting pitches
 // should span 3 octaves, starting from C06.
-const Sonifier = new Sonify(data, 10, {
+const Sonifier = new Sonify({
+  data, 
+  songLength: 10,
   octaves: 3,
   baseOctave: 6,
   glissando: true,
@@ -37,30 +39,29 @@ Sonifier.stop();
 
 ## API
 
-### Sonify class
+### Sonify constructor options
 
-{Array<Array<number>>} **data** _required_ - Two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
+-------------------------------------------------------------------------------------------------------------------------------------- 
 
-{number} **songLength** _required_ - Length of the generated song in seconds
+| Name         | Type                 | Sample Value                                 | Description                                                                                                                            | Default                                                           | Required |
+| ------------ | -------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | -------- |
+| data         | Array<Array<number>> | [[1586969694206, 2.3], [1596969695555, 5.3]] | Two dimensional array of data points                                                                                                   |                                                                   | yes      |
+| songLength   | number               | 60                                           | Length of the generated song in seconds                                                                                                |                                                                   | yes      |
+| pitches      | Array<string>        | ["A", "C#", "E"]                             | Array of pitch names to use. Default is all 12 chromatic notes                                                                         | ["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"] | no       |
+| octaveRange  | number               | 2                                            | Number of octaves that the song should span.                                                                                           | 3                                                                 | no       |
+| baseOctave   | number               | 4                                            | Starting octave for the sonification. There are 9 octaves available, so `baseOctave` must be less than `9 - octaveRange`.              | 6                                                                 | no       |
+| glissando    | boolean              | true                                         | Whether or not to glide from one pitch to another. With this option enabled you can clearly hear the shape of the data.                | false                                                             | no       |
+| staticRhythm | boolean              | false                                        | Disregard timestamps and give each data point an equal note length by dividing the provided `songLength` by the number of data points. | false                                                             | no       |
+| onEnded      | function             | () => console.log("That's all folks")        | Callback that is invoked when the song is finished playing                                                                             |                                                                   | no       | **** |
 
-{Object} **options**
+## Methods
 
-{Array<string>} **options.pitches** _default: ["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"]_ - Array of pitch names to use, e.g. ["A", "C#", "E"]. Default is all 12 chromatic notes.
-
-{number} **options.octaves** _default: 3_ - Number of octaves that the song should span.
-
-{number} **options.baseOctave** _default: 6_ - Base octave to start from. There are 9 octaves available, so whatever you set as the base octave must be less than `9 - octaves`, or else you'll be out of range.
-
-{number} **options.glissando** _default: false_ - Glide from one pitch to another. With this option enabled you can clearly hear the shape of the data.
-
-{number} **options.staticRhythm** _default: false_ - Disregard timestamps and give each data point an equal note length by dividing the provided songLength by the number of data points.
-
-{function} **options.onEnded** - Callback that is invoked when the song is finished playing
+--------------------------------------------------------------------------------------------------------------------------------------
 
 ### Sonify.prototype.play()
 
-returns {void}
+Initiates playback of the provided data
 
 ### Sonify.prototype.stop()
 
-returns {void}
+Stops playback and clears the web audio context

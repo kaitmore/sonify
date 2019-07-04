@@ -13,12 +13,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@zeit/next-css": "^1.0.1",
     "moment": "^2.24.0",
     "next": "^8.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-live": "^2.1.2",
-    "sonify": "^0.2.4",
     "victory": "^32.2.3"
   }
 }

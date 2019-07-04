@@ -5,11 +5,10 @@ import notes from "./notes";
 
 /**
  * @class Sonify
- * @param {Array<Array<number>>} data - Two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
- * @param {number} songLength - Length of the generated song in seconds
- * @param {Object} options
+ * @param {Array<Array<number>>} options.data - Two dimensional array of data points, e.g. [[1586969694206, 2.3], [1596969695555, 5.3]]
+ * @param {number} options.songLength - Length of the generated song in seconds
  * @param {Array<string>} options.pitches - Array of pitch names to use, e.g. ["C", "D", "E", "F", "G", "A", "B"]
- * @param {number} options.octaves - Number of octaves that the song should span
+ * @param {number} options.octaveRange - Number of octaves that the song should span
  * @param {number} options.baseOctave - Base octave
  * @param {boolean} options.glissando - Whether pitches should glide seamlessly from one to another
  * @param {boolean} options.staticRhythm - Do not calculate rhythm based on timestamps, and instead equally divide pitches into the specified songLength
@@ -17,30 +16,17 @@ import notes from "./notes";
  * @return {Sonify} - A Sonify object
  */
 class Sonify {
-  constructor(data, songLength, options) {
-    const {
-      pitches = [
-        "C",
-        "C#",
-        "D",
-        "D#",
-        "E",
-        "F",
-        "Gb",
-        "G",
-        "A",
-        "Ab",
-        "Bb",
-        "B"
-      ],
-      octaves = 2,
-      baseOctave = 3,
-      glissando = false,
-      staticRhythm = false,
-      onEnded = () => {}
-    } = options || {};
-
-    _validate(data, songLength, pitches, octaves, baseOctave);
+  constructor({
+    pitches = ["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"],
+    octaveRange = 2,
+    baseOctave = 3,
+    glissando = false,
+    staticRhythm = false,
+    onEnded = () => {},
+    data = [],
+    songLength
+  }) {
+    _validate(data, songLength, pitches, octaveRange, baseOctave);
 
     this.pitches = Object.keys(notes)
       .filter(note => {
@@ -48,7 +34,7 @@ class Sonify {
       })
       .map(pitchName => notes[pitchName]);
     this.minPitch = baseOctave * pitches.length;
-    this.maxPitch = octaves * pitches.length + this.minPitch;
+    this.maxPitch = octaveRange * pitches.length + this.minPitch;
     this.currentTime = 0;
     this.glissando = glissando;
     this.staticRhythm = staticRhythm;
