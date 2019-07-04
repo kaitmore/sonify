@@ -8,6 +8,6 @@ npm run export
 
 cd ../
 
-echo "Publishing to gh pages...\n"
+echo "Publishing to gh pages..."
 
 npm run publish:demo

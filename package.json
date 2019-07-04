@@ -7,7 +7,7 @@
     "test": "npm test",
     "build": "rollup --config",
     "build:watch": "npm run build -- -w",
-    "postpublish": "./publish.sh",
+    "postpublish": "./publish-demo.sh",
     "publish:demo": "npx gh-pages --add --dist ./demo/out/"
   },
   "keywords": [
