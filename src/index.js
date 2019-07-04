@@ -12,6 +12,7 @@ import notes from "./notes";
  * @param {number} options.baseOctave - Base octave
  * @param {boolean} options.glissando - Whether pitches should glide seamlessly from one to another
  * @param {boolean} options.staticRhythm - Do not calculate rhythm based on timestamps, and instead equally divide pitches into the specified songLength
+ * @param {boolean} options.volume - The volume of the song, from 0.0 to 1.0.
  * @param {function} options.onEnded - Callback that is invoked when the song is finished playing
  * @return {Sonify} - A Sonify object
  */
@@ -22,6 +23,7 @@ class Sonify {
     baseOctave = 3,
     glissando = false,
     staticRhythm = false,
+    volume = 0.05,
     onEnded = () => {},
     data = [],
     songLength
@@ -41,6 +43,7 @@ class Sonify {
     this.songLength = songLength;
     this.data = _transform.call(this, data);
     this.onEnded = onEnded;
+    this.volume = volume;
   }
 }
 
@@ -152,7 +155,7 @@ function _mapTimeToNoteLength(data) {
 function _createSound(freq, nextFreq, noteLength) {
   // Schedule the current frequency and gain
   this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
-  this.gainNode.gain.setTargetAtTime(1, this.currentTime, 0.015);
+  this.gainNode.gain.setTargetAtTime(this.volume, this.currentTime, 0.015);
 
   if (this.glissando) {
     // Schedule an exponential change in frequency from the current
@@ -195,6 +198,7 @@ Sonify.prototype.play = function() {
   // Connect the oscillator and gain to the context destination
   this.oscillator.connect(this.gainNode);
   this.gainNode.connect(Sonify.context.destination);
+  this.gainNode.gain.setValueAtTime(0, this.currentTime);
 
   // Start the oscillator node
   this.oscillator.start(this.currentTime);

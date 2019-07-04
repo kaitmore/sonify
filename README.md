@@ -41,24 +41,27 @@ Sonifier.stop();
 
 ### Sonify constructor options
 
-| Name         | Type                 | Sample Value                                   | Description                                                                                                                            | Default                                                             | Required |
-| ------------ | -------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------- |
-| data         | Array<Array<number>> | `[[1586969694206, 2.3], [1596969695555, 5.3]]` | Two dimensional array of data points                                                                                                   |                                                                     | yes      |
-| songLength   | number               | 60                                             | Length of the generated song in seconds                                                                                                |                                                                     | yes      |
-| pitches      | Array<string>        | `["A", "C#", "E"]`                             | Array of pitch names to use. Default is all 12 chromatic notes                                                                         | `["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"]` | no       |
-| octaveRange  | number               | 2                                              | Number of octaves that the song should span.                                                                                           | 3                                                                   | no       |
-| baseOctave   | number               | 4                                              | Starting octave for the sonification. There are 9 octaves available, so `baseOctave` must be less than `9 - octaveRange`.              | 6                                                                   | no       |
-| glissando    | boolean              | true                                           | Whether or not to glide from one pitch to another. With this option enabled you can clearly hear the shape of the data.                | false                                                               | no       |
-| staticRhythm | boolean              | false                                          | Disregard timestamps and give each data point an equal note length by dividing the provided `songLength` by the number of data points. | false                                                               | no       |
-| onEnded      | function             | `() => console.log("That's all folks")`        | Callback that is invoked when the song is finished playing                                                                             |                                                                     | no       | **** |
+_* = required_
 
-## Methods
+| Name         | Type                 | Sample Value                                   | Description                                                                                                                            | Default                                                             |
+| ------------ | -------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| data*        | Array<Array<number>> | `[[1586969694206, 2.3], [1596969695555, 5.3]]` | Two dimensional array of data points                                                                                                   |                                                                     |
+| songLength*  | number               | 60                                             | Length of the generated song in seconds                                                                                                |                                                                     |
+| volume       | number               | 0.05                                           | The volume of the song, from 0.0 to 1.0.                                                                                               | 0.05                                                                |
+| pitches      | Array<string>        | `["A", "C#", "E"]`                             | Array of pitch names to use. Default is all 12 chromatic notes                                                                         | `["C", "C#", "D", "D#", "E", "F", "Gb", "G", "A", "Ab", "Bb", "B"]` |
+| octaveRange  | number               | 2                                              | Number of octaves that the song should span.                                                                                           | 3                                                                   |
+| baseOctave   | number               | 4                                              | Starting octave for the sonification. There are 9 octaves available, so `baseOctave` must be less than `9 - octaveRange`.              | 6                                                                   |
+| glissando    | boolean              | true                                           | Whether or not to glide from one pitch to another. With this option enabled you can clearly hear the shape of the data.                | false                                                               |
+| staticRhythm | boolean              | false                                          | Disregard timestamps and give each data point an equal note length by dividing the provided `songLength` by the number of data points. | false                                                               |
+| onEnded      | function             | `() => console.log("That's all folks")`        | Callback that is invoked when the song is finished playing                                                                             |                                                                     |
 
-### Sonify.prototype.play()
+### Methods
+
+#### Sonify.prototype.play()
 
 Initiates playback of the provided data
 
-### Sonify.prototype.stop()
+#### Sonify.prototype.stop()
 
 Stops playback and clears the web audio context
 
