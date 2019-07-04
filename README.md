@@ -4,6 +4,8 @@ A module that allows you to sonify timeseries data. The Sonify class will scale 
 
 The duration of a note is calculated by measuring the time between two data points. This is then scaled to the timeframe provided by `songLength`. You can optionally set `staticRythm: true` to disregard timestamps and give each data point an equal note length.
 
+[View a live playground here.](https://kaitmore.github.io/sonify)
+
 ## Usage
 
 ```javascript

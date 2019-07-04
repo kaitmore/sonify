@@ -180,7 +180,12 @@ const Editor = () => (
     }}
   >
     <LiveEditor style={{ minWidth: "500px", outline: "none" }} />
-    <LiveError />
+    <LiveError
+      style={{
+        whiteSpace: "pre-line",
+        width: "100%"
+      }}
+    />
     <LivePreview style={{ width: "100%", height: "100%" }} />
   </LiveProvider>
 );
