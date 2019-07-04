@@ -43,6 +43,7 @@ class Example extends React.Component {
         songLength: 10,
         pitches: ["A", "C#", "E", "G#", "B"],
         octaveRange: 2,
+        volume: 0.01,
         baseOctave: 4,
         glissando: true,
         staticRhythm: false,
