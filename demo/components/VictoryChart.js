@@ -10,7 +10,7 @@ const VictoryChartRenderer = ({ data }) => (
         axis: { stroke: "rgb(214, 222, 235)" },
         tickLabels: {
           fontFamily: "arial",
-          fontSize: "8px",
+          fontSize: "6px",
           padding: 5,
           textAnchor: "end",
           fill: "rgb(214, 222, 235)"
@@ -23,7 +23,7 @@ const VictoryChartRenderer = ({ data }) => (
         axis: { stroke: "rgb(214, 222, 235)" },
         tickLabels: {
           fontFamily: "arial",
-          fontSize: "8px",
+          fontSize: "6px",
           angle: 35,
           padding: 3,
           textAnchor: "start",

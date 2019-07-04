@@ -10,9 +10,6 @@ const Player = ({ onPlay, onStop, isPlaying }) => {
     >
       <h1>sonify demo</h1>
       <button type="button" onClick={() => (isPlaying ? onStop() : onPlay())}>
-        {/* <span role="img" aria-label="play" style={{ padding: "8px" }}>
-          &#9654;
-        </span> */}
         {isPlaying ? "Stop" : "Listen"}
       </button>
     </div>
