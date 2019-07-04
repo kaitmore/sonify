@@ -7,5 +7,8 @@ module.exports = withCSS({
       "/": { page: "/" }
     };
   },
-  assetPrefix: process.env.NODE_ENV === "production" ? "/sonify" : ""
+  assetPrefix:
+    process.env.NODE_ENV === "production"
+      ? "https://kaitmore.github.io/sonify/"
+      : ""
 });
