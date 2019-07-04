@@ -42,7 +42,7 @@ class Example extends React.Component {
         data, 
         songLength: 10,
         pitches: ["A", "C#", "E", "G#", "B"],
-        octaves: 2,
+        octaveRange: 2,
         baseOctave: 4,
         glissando: true,
         staticRhythm: false,
