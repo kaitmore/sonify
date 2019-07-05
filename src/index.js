@@ -12,7 +12,7 @@ import notes from "./notes";
  * @param {number} options.baseOctave - Base octave
  * @param {boolean} options.glissando - Whether pitches should glide seamlessly from one to another
  * @param {boolean} options.staticRhythm - Do not calculate rhythm based on timestamps, and instead equally divide pitches into the specified songLength
- * @param {boolean} options.volume - The volume of the song, from 0.0 to 1.0.
+ * @param {number} options.volume - The volume of the song, from 0.0 to 1.0.
  * @param {function} options.onEnded - Callback that is invoked when the song is finished playing
  * @return {Sonify} - A Sonify object
  */
