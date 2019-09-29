@@ -19,7 +19,9 @@
   "author": "Kaitlin Moreno",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "rollup-plugin-cdn": "^0.1.2",
+    "tone": "^13.4.9"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",

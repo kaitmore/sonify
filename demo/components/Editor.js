@@ -18,7 +18,7 @@ class Example extends React.Component {
 
   render() {
     const data = [
-      [1536969666906, 1],
+      [1536969666906, 22],
       [1546969674206, 2],
       [1596966695555, 4.3],
       [1666959697655, 0],
@@ -179,7 +179,9 @@ const Editor = () => (
       ]
     }}
   >
-    <LiveEditor style={{ minWidth: "500px", outline: "none" }} />
+    <LiveEditor
+      style={{ minWidth: "500px", outline: "none", overflow: "scroll" }}
+    />
     <LiveError
       style={{
         whiteSpace: "pre-line",

@@ -31,13 +31,10 @@ class Sonify {
     _validate(data, songLength, pitches, octaveRange, baseOctave);
 
     this.pitches = Object.keys(notes)
-      .filter(note => {
-        return pitches.includes(note.replace(/\d/g, ""));
-      })
+      .filter(note => pitches.includes(note.replace(/\d/g, "")))
       .map(pitchName => notes[pitchName]);
     this.minPitch = baseOctave * pitches.length;
     this.maxPitch = octaveRange * pitches.length + this.minPitch;
-    this.currentTime = 0;
     this.glissando = glissando;
     this.staticRhythm = staticRhythm;
     this.songLength = songLength;
@@ -69,8 +66,17 @@ function _transform(data) {
  * @return {void}
  */
 function _setContext() {
-  Sonify.context = new (window.AudioContext || window.webkitAudioContext)();
-  Sonify.currentTime = Sonify.context.currentTime;
+  if (
+    !Sonify.context ||
+    (Sonify.context && Sonify.context.state === "closed")
+  ) {
+    Sonify.context = new (window.AudioContext || window.webkitAudioContext)();
+    if (window.Tone !== undefined) {
+      Tone.setContext(Sonify.context);
+    }
+    // Set context current time to another variable because it is read-only
+    Sonify.currentTime = Sonify.context.currentTime;
+  }
 }
 
 /**
@@ -80,6 +86,9 @@ function _setContext() {
  */
 function _clearContext() {
   if (Sonify.context && Sonify.context.state === "running") {
+    Sonify.oscillators.forEach(o => {
+      o.stop();
+    });
     Sonify.context.close();
     Sonify.currentTime = 0;
   }
@@ -143,7 +152,6 @@ function _mapTimeToNoteLength(data) {
     }
   });
 }
-
 /**
  * Takes two frequencies and a note length (in beats) and
  * creates a gain and oscillator node.
@@ -153,29 +161,42 @@ function _mapTimeToNoteLength(data) {
  * @return {void}
  */
 function _createSound(freq, nextFreq, noteLength) {
+  Sonify.oscillator = Sonify.context.createOscillator();
+  Sonify.gainNode = Sonify.context.createGain();
+  Sonify.oscillators = [Sonify.oscillator, ...Sonify.oscillators];
+  Sonify.oscillator.connect(Sonify.gainNode);
+  Sonify.gainNode.connect(Sonify.context.destination);
+  // Create gain and oscillator nodes
   // Schedule the current frequency and gain
-  this.oscillator.frequency.setValueAtTime(freq, this.currentTime);
-  this.gainNode.gain.setTargetAtTime(this.volume, this.currentTime, 0.015);
-
+  Sonify.oscillator.frequency.setValueAtTime(freq, Sonify.currentTime);
+  Sonify.gainNode.gain.setValueAtTime(0, Sonify.currentTime);
+  Sonify.gainNode.gain.setTargetAtTime(this.volume, Sonify.currentTime, 0.015);
+  Sonify.gainNode.gain.setTargetAtTime(
+    0,
+    Sonify.currentTime + noteLength,
+    0.015
+  );
   if (this.glissando) {
     // Schedule an exponential change in frequency from the current
     // pitch to the next that spans the noteLength value
-    this.oscillator.frequency.exponentialRampToValueAtTime(
+    Sonify.oscillator.frequency.exponentialRampToValueAtTime(
       nextFreq,
-      this.currentTime + noteLength
+      Sonify.currentTime + noteLength
     );
   } else {
     // If glissando is false, instead we want to add a slight space between each
     // note so we can differentiate the data points
-    this.gainNode.gain.setTargetAtTime(
+    Sonify.gainNode.gain.setTargetAtTime(
       0,
-      this.currentTime + noteLength - noteLength / this.songLength,
+      Sonify.currentTime + noteLength - noteLength / this.songLength,
       0.015
     );
   }
 
+  Sonify.oscillator.start(Sonify.currentTime);
+  Sonify.oscillator.stop(Sonify.currentTime + noteLength + 0.15);
   // Move the currentTime forward
-  this.currentTime += noteLength;
+  Sonify.currentTime += noteLength;
 }
 
 /**
@@ -184,24 +205,34 @@ function _createSound(freq, nextFreq, noteLength) {
  * @returns {void}
  */
 Sonify.prototype.play = function() {
+  console.log("Sonify.oscillators", Sonify.oscillators);
+  Sonify.oscillators = [];
+  console.log("Sonify.currentTime when play is pressed :", Sonify.currentTime);
   if (Sonify.context && Sonify.context.state === "running") {
+    console.log("context exists");
     _clearContext.call(this);
   }
+
   this.isPlaying = true;
   // Create the audio context
   _setContext.call(this);
 
   // Create gain and oscillator nodes
-  this.gainNode = Sonify.context.createGain();
-  this.oscillator = Sonify.context.createOscillator();
+  // Sonify.gainNode = Sonify.context.createGain();
 
   // Connect the oscillator and gain to the context destination
-  this.oscillator.connect(this.gainNode);
-  this.gainNode.connect(Sonify.context.destination);
-  this.gainNode.gain.setValueAtTime(0, this.currentTime);
+  // if (window.Tone !== undefined) {
+  //   Sonify.oscillator = new Tone.FatOscillator();
+  //   console.log("creating new oscilator");
+  //   Tone.connect(Sonify.oscillator, Sonify.gainNode);
+  //   Tone.connect(Sonify.gainNode, Sonify.context.destination);
+  // } else {
+  //   Sonify.oscillator = Sonify.context.createOscillator();
+  //   Sonify.oscillator.connect(Sonify.gainNode);
+  // Sonify.gainNode.connect(Sonify.context.destination);
+  // }
 
   // Start the oscillator node
-  this.oscillator.start(this.currentTime);
 
   let freq, nextFreq;
   for (let i = 0; i < this.data.length; i++) {
@@ -221,28 +252,34 @@ Sonify.prototype.play = function() {
     _createSound.call(this, freq, nextFreq, this.data[i].noteLength);
   }
 
-  this.oscillator.stop(this.currentTime);
-
   // Remove the "click" by setting the gain to 0 before the end of the last note
-  this.gainNode.gain.setTargetAtTime(
+  Sonify.gainNode.gain.setTargetAtTime(
     0,
-    this.currentTime - this.songLength / this.data.length,
+    Sonify.currentTime - this.songLength / this.data.length,
     0.015
   );
-  this.oscillator.onended = e => {
-    this.isPlaying = false;
+  Sonify.oscillator.onended = e => {
     this.onEnded(e);
+    this.stop();
   };
 };
 
+function _stop() {
+  Sonify.context.close();
+  Sonify.oscillators.forEach(o => {
+    o.stop();
+  });
+  Sonify.oscillators = [];
+  Sonify.currentTime = 0;
+  this.isPlaying = false;
+  this.onEnded();
+}
 /**
- * Clears the audio context
+ * Stop method
  * @returns {void}
  */
 Sonify.prototype.stop = function() {
-  _clearContext.call(this);
-  this.isPlaying = false;
-  this.onEnded();
+  _stop.call(this);
 };
 
 export default Sonify;

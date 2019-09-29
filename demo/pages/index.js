@@ -15,6 +15,11 @@ export default () => (
   >
     <Head>
       <title>Sonify Demo</title>
+
+      <script
+        type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/tone/13.8.17/Tone.js"
+      ></script>
     </Head>
     <GithubCorner />
     <Editor />
