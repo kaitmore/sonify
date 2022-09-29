@@ -20,6 +20,6 @@
     "react-dom": "^16.8.6",
     "react-live": "^2.1.2",
     "sonify": "^0.3.1",
-    "victory": "^32.2.3"
+    "victory": "^36.6.8"
   }
 }
